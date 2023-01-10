@@ -21,7 +21,7 @@ library(tidyverse)
 The first argument to `read_csv()` is the most important: it's the path to the file to read.
 
 ```{r, message = TRUE}
-heights <- read_csv("data/heights.csv")
+heights <- read_csv("Dateien von Canvas/heights.csv")
 ```
 
 You can also supply an inline csv file. This is useful for experimenting with readr and for creating reproducible examples to share with others:
