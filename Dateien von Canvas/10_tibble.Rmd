@@ -1,0 +1,95 @@
+---
+title: "Tibbles"
+author: "dr. Geert Monsieur"
+output:
+  html_document:
+    toc: yes
+    toc_collapsed: no
+    toc_float: yes
+  pdf_document:
+    toc: yes
+---
+
+# Tibbles
+
+## Introduction
+
+Throughout this book we work with "tibbles" instead of R's traditional `data.frame`. Tibbles _are_ data frames, but they tweak some older behaviours to make life a little easier.
+
+### Prerequisites
+
+```{r setup, message = FALSE}
+library(tidyverse)
+```
+
+## Creating tibbles {#tibbles}
+
+You have an old-fashioned R data frame? With the `as_tibble` function you can easily obtain a tibble version. 
+
+```{r}
+as_tibble(iris)
+```
+
+You can create a new tibble from individual vectors with `tibble()`.
+
+```{r}
+tibble(
+  x = 1:5, 
+  y = 1, 
+  z = x ^ 2 + y
+)
+```
+
+
+## Tibbles vs. data.frame
+
+There are two main differences in the usage of a tibble vs. a classic `data.frame`: printing and subsetting.
+
+### Printing
+
+Tibbles have a refined print method that shows only the first 10 rows, and all the columns that fit on screen. This makes it much easier to work with large data. In addition to its name, each column reports its type.
+
+```{r}
+nycflights13::flights
+```
+
+Tibbles are designed so that you don't accidentally overwhelm your console when you print large data frames. But sometimes you need more output than the default display. There are a few options that can help.
+
+First, you can explicitly `print()` the data frame and control the number of rows (`n`) and the `width` of the display. `width = Inf` will display all columns:
+
+```{r, eval = FALSE}
+nycflights13::flights %>% 
+  print(n = 10, width = Inf)
+```
+
+You can see a complete list of options by looking at the package help with `package?tibble`.
+
+A final option is to use RStudio's built-in data viewer to get a scrollable view of the complete dataset. This is also often useful at the end of a long chain of manipulations.
+
+```{r, eval = FALSE}
+nycflights13::flights %>% 
+  View()
+```
+
+### Subsetting (or selecting a single variable)
+
+```{r}
+df <- tibble(
+  x = 1:5,
+  y = 5:9
+)
+
+# Extract by name
+df$x
+df[["x"]]
+
+# Extract by position
+df[[1]]
+```
+
+To use these in a pipe, you'll need to use the special placeholder `.`:
+
+```{r}
+df %>% .$x
+df %>% .[["x"]]
+```

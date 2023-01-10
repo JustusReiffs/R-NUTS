@@ -1,0 +1,127 @@
+---
+title: "Data visualisation"
+author: "dr. Geert Monsieur"
+output: html_document
+---
+
+# Data visualisation
+
+## Prerequisites
+
+One of the main libraries used in the textbook is tidyverse, which can be loaded by calling the `library` function.
+
+```{r}
+library(tidyverse)
+```
+
+## First steps
+
+Do cars with big engines use more fuel than cars with small engines? You probably already have an answer.
+
+### The `mpg` data frame
+
+The data frame (i.e. the dataset) we use, is part of the tidyverse library and can be retrieved with `mpg`.
+
+```{r}
+mpg
+```
+
+Documentation can be consulted by adding a question mark to the data frame name, namely `?mpg`.
+
+```{r}
+?mpg
+```
+
+### Creating a ggplot
+
+Plots we make in this course are typically created using the famous `ggplot` function. `ggplot` creates a coordinate system that you can add layers to. The first argument of the function is the dataset to use in the graph. Simply `ggplot(data = mpg)` creates an empty graph. Therefore, we add a first layer, which in this case is created by the `geom_point` function and renders a scatter plot.
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy))
+```
+
+## Aesthetic mappings
+
+The *color* of the points can be customized in the aesthetic mappings.
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = class))
+```
+
+The *size* of the points can be customized in the aesthetic mappings.
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, size = class))
+```
+
+The *transparancy* (i.e. alpha) of the points can be customized in the aesthetic mappings.
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, alpha = class))
+```
+
+The *shape* of the points can be customized in the aesthetic mappings.
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, shape = class))
+```
+
+## Common problems
+
+Pay attention to where you break the line when defining the layers in your `ggplot`-based plot.
+
+```{r}
+ggplot(data = mpg) +  geom_point(mapping = aes(x = displ, y = hwy, shape = class))
+```
+
+
+## Facets
+
+When you want to create multiple similar plots, facets allow to split your plot into _facets_, which are subplots that each display one subset of the data.
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_wrap(~ class, nrow = 2)
+```
+
+Similarly, you can also create grids of facets.
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(drv ~ cyl)
+```
+
+
+## Geometric objects
+
+Trendlines can be added as an additional layer in a plot by calling the `geom_smooth` function.
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = class)) +
+  geom_smooth(mapping = aes(x = displ, y = hwy))
+```
+
+Please note ggplot is layered based and common settings can be set in the ggplot function.
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point(mapping = aes (color = class)) +
+  geom_smooth()
+```
+
+## Statistical transformations
+
+Bar plots can be created using the `geom_bar` function.
+
+```{r}
+ggplot(data = diamonds) +
+  geom_bar(mapping = aes(x = cut))
+```

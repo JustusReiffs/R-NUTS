@@ -1,0 +1,240 @@
+---
+title: "Data transformation"
+author: "dr. Geert Monsieur"
+output:
+  html_document:
+    toc: yes
+    toc_collapsed: no
+    toc_float: yes
+  pdf_document:
+    toc: yes
+---
+
+## Introduction
+
+```{r message=FALSE, warning=FALSE}
+library(nycflights13)
+library(tidyverse)
+```
+
+```{r R.options=list(max.print=10)}
+flights
+```
+
+## Filter
+
+Do you remember SQL?
+
+```{r message=FALSE, warning=FALSE}
+library(sqldf)
+```
+
+```{r R.options=list(max.print=20)}
+sqldf("select * from flights where month = 12 and day = 25")
+```
+
+How can we do it directly in R (using a tidyverse function)?
+
+```{r}
+filter(flights, month == 12, day == 25)
+```
+
+Original data frame remains the same. Use the assignment operator `<-` to store the filtered data set.
+
+```{r}
+dec25 <- filter(flights, month == 12, day == 25)
+```
+
+Interested in any difference between `=` and `<-`? Check https://renkun.me/2014/01/28/difference-between-assignment-operators-in-r/.
+
+### Comparisons
+
+Why is the following statement (commented out) not working?
+
+```{r}
+#filter(flights, month = 1)
+```
+
+### Logical operators
+
+Obviously, R comes with classical logical operators like `|`, `&` and `!`.
+
+```{r}
+filter(flights, month == 11 | month == 12)
+```
+
+As in SQL there is also a `IN` kind of operator: `%in%`. Please note that the `c()` function combines values into a _vector_, which is typically used together with the `%in%` operator.
+
+```{r}
+nov_dec <- filter(flights, month %in% c(11, 12))
+```
+
+### Missing values
+
+What you perhaps remember as `null` values are called `NA` values in R.
+
+```{R}
+x <- NA
+y <- NA
+```
+
+This can be tricky when you start comparing `NA` values.
+
+```{r}
+x < 5
+x == y
+```
+
+Fortunately, you can check whether or not a variable has a `NA` value using the `is.na()` function and apply it in the e.g. `filter` function.
+
+```{r}
+is.na(x)
+filter(flights,is.na(arr_time))
+filter(flights,!is.na(arr_time))
+```
+
+
+
+## Arrange
+
+Similar to _order by_ in SQL, you can always rearrange rows coming from a data frame.
+
+```{r}
+arrange(flights, year, month, day)
+arrange(flights, desc(dep_delay))
+```
+
+## Select
+
+Selecting columns like in SQL is also very straightforward.
+
+```{r}
+select(flights, year, month, day)
+```
+
+Selecting columns between two columns can be done using `:`.
+
+```{r}
+select(flights, year:day)
+```
+
+Excluding certain columns can be done using `-`.
+
+```{r}
+select(flights, -(year:day))
+```
+
+Many helper functions like `starts_with`, `ends_with`, `contains` and `matches`.
+
+```{r}
+select(flights,contains("time"))
+```
+
+## Mutate
+
+Suppose we are interested in the speed of airplanes and how much time they gain during the flight.
+
+Let's first select the delay variables, distance and air_time variables.
+
+```{r}
+flights_sml <- select(flights, 
+  year:day, 
+  ends_with("delay"), 
+  distance, 
+  air_time
+)
+```
+
+Next, we can calculate the gain and speed using the `mutate` function.
+
+```{r}
+mutate(flights_sml,
+  gain = dep_delay - arr_delay,
+  speed = (distance / air_time) * 60,
+)
+```
+
+Let's add gain hours and gain_per_hour.
+
+```{r}
+mutate(flights_sml,
+  gain = dep_delay - arr_delay,
+  speed = (distance / air_time) * 60,
+  hours = air_time / 60,
+  gain_per_hour = gain / hours
+)
+```
+
+`transmute` immediately selects the newly created variables.
+
+```{r}
+transmute(flights_sml,
+  gain = dep_delay - arr_delay,
+  speed = (distance / air_time) * 60,
+  hours = air_time / 60,
+  gain_per_hour = gain / hours
+)
+```
+
+## Summarize
+
+Do you remember aggregate functions? Using `summarize` you can have these within R.
+
+```{r}
+summarise(flights, delay = mean(dep_delay, na.rm = TRUE))
+```
+
+Typically, we used these aggregate functions with _group by_ statements. A similar function exists within R.
+
+```{r}
+by_carrier <- group_by(flights, carrier)
+carrier_delays <- summarise(by_carrier, delay = mean(dep_delay, na.rm = TRUE))
+arrange(carrier_delays,desc(delay))
+```
+
+Let's explore the relationship between the distance and average delay for each location. First, we do the group by and summarise.
+
+```{r}
+by_dest <- group_by(flights, dest)
+delay <- summarise(by_dest,
+  count = n(),
+  dist = mean(distance, na.rm = TRUE),
+  delay = mean(arr_delay, na.rm = TRUE)
+)
+```
+
+Next, we make a plot to visualise the relationship between distance and delay.
+
+```{r}
+ggplot(data = delay, mapping = aes(x=dist,y=delay)) +
+  geom_point() + geom_label(aes(label=dest)) +
+  geom_smooth()
+```
+
+For the sake of science, we might want to exclude these destinations where we do not have more than 20 flights, because we prefer large numbers when drawing conclusions. Furthermore, we filter out Honolulu as this is clearly an outlier.
+
+```{r}
+delay <- filter(delay, count > 20, dest != "HNL")
+ggplot(data = delay, mapping = aes(x=dist,y=delay)) +
+  geom_point() + geom_label(aes(label=dest)) +
+  geom_smooth()
+```
+
+Let's introduce the pipe `%>%`, which make it very easy to combine multiple transformations without creating additional data frames.
+
+```{r}
+delays <- flights %>%
+  group_by(dest) %>%
+  summarise(
+    count = n(),
+    dist = mean(distance,na.rm = TRUE),
+    delay = mean(arr_delay,na.rm = TRUE)
+  ) %>%
+  filter(count > 20, dest != "HNL")
+```
+
+```{r}
+ggplot(data = delays, mapping = aes(x=dist,y=delay)) +
+  geom_point(alpha = 0.2) +
+  geom_smooth()
+```

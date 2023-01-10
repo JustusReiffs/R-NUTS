@@ -1,0 +1,165 @@
+---
+title: "Relational data"
+author: "dr. Geert Monsieur"
+output:
+  html_document:
+    toc: yes
+    toc_collapsed: no
+    toc_float: yes
+  pdf_document:
+    toc: yes
+---
+  
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(nycflights13)
+```
+
+## Introduction
+
+nycflights13 has four tibbles that are related to flights: airlines, airports, planes and weather.
+
+## nycflights13
+
+## Keys
+
+In contrast to database tables, tibbles or data frames have no primary keys, but you can use R for checking whether or not certain variables could be keys.
+
+```{r}
+planes %>% 
+  count(tailnum) %>% 
+  filter(n > 1)
+```
+
+```{r}
+flights %>% 
+  count(tailnum) %>% 
+  filter(n > 1)
+```
+
+```{r}
+flights %>% 
+  count(year, month, day, carrier, flight, sched_dep_time) %>% 
+  filter(n > 1)
+```
+
+If you would like to a surrogate key you can use `mutate()` and `row_number()`.
+
+```{r}
+flights_with_surrogate_key <- flights %>% 
+  mutate(
+    key = row_number()
+  )
+flights_with_surrogate_key
+```
+
+## Mutating joins
+
+A mutating join allows you to combine variables from two tables. It first matches observations by their keys, then copies across variables from one table to the other.
+
+Let's first _select_ a limited set of columns to make it easy to view the data that we use next.
+
+```{r}
+flights2 <- flights %>% 
+  select(year:day, hour, origin, dest, tailnum, carrier)
+flights2
+```
+
+```{r}
+flights2 %>%
+  #select(-origin, -dest) %>% 
+  left_join(airlines, by = "carrier")
+```
+
+The result of joining airlines to flights2 is an additional variable: name. This is why this type of join is sometimes referred to as a mutating join.
+
+```{r}
+flights2 %>%
+  left_join(airlines, by = "carrier") %>%
+  filter(is.na(name))
+```
+
+In order to explain what exactly the left join is about we create two new tribbles.
+
+```{r}
+x <- tribble(
+  ~key, ~val_x,
+     1, "x1",
+     2, "x2",
+     3, "x3"
+)
+y <- tribble(
+  ~key, ~val_y,
+     1, "y1",
+     2, "y2",
+     4, "y3"
+)
+```
+
+```{r}
+x %>% 
+  inner_join(y, by = "key")
+```
+
+```{r}
+x
+y
+```
+
+```{r}
+x %>% 
+  left_join(y, by = "key")
+```
+
+```{r}
+x %>% 
+  right_join(y, by = "key")
+```
+
+Typically, you join by the key, but if you do not specify which columns should match (or use `by = NULL`) the so called natural join is calculated, which means the two tables are matched on their common variables.
+
+If we join `flights2` and `weather` we match on their common variables: `year`, `month`, `day`, `hour` and `origin`.
+
+```{r}
+flights2 %>%
+  left_join(weather)
+```
+
+```{r}
+flights2 %>%
+  left_join(weather, by = c("year", "month", "day", "hour", "origin"))
+```
+    
+When adding columns from the airports table we do not have common columns, or at least not with the same name. However, like in databases you can also fully specify the join condition.
+
+```{r}
+flights2 %>% 
+      left_join(airports, c("dest" = "faa"))
+flights2 %>% 
+      left_join(airports, c("origin" = "faa"))
+```
+
+## Filtering joins
+
+Filtering joins match observations in the same way as mutating joins, but affect the observations, not the variables. There are two types:
+
+* `semi_join(x, y)` __keeps__ all observations in `x` that have a match in `y`.
+* `anti_join(x, y)` __drops__ all observations in `x` that have a match in `y`.
+
+```{r}
+x %>% 
+  semi_join(y, by = "key")
+```
+
+```{r}
+x %>% 
+  anti_join(y, by = "key")
+```
+
+Anti-joins are useful for diagnosing join mismatches. For example, when connecting `flights` and `planes`, you might be interested to know that there are many `flights` that don't have a match in `planes`:
+
+```{r}
+flights %>%
+  anti_join(planes, by = "tailnum") %>%
+  count(tailnum, sort = TRUE)
+```

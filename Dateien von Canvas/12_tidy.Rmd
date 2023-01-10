@@ -1,0 +1,204 @@
+# Tidy data
+
+## Introduction
+
+### Prerequisites
+
+```{r setup, message = FALSE}
+library(tidyverse)
+```
+
+## Tidy data
+
+The example below shows the same data organised in four different ways. Each dataset shows the same values of four variables *country*, *year*, *population*, and *cases*, but each dataset organises the values in a different way.
+
+```{r}
+table1
+table2
+table3
+
+# Spread across two tibbles
+table4a  # cases
+table4b  # population
+```
+
+Not really tidy, right? What do we need in orde have a _tidy_ dataset?
+
+1.  Each variable must have its own column.
+1.  Each observation must have its own row.
+1.  Each value must have its own cell.
+
+Hence, only `table1` is tidy. It's the only representation where each column is a variable.
+
+Below a few examples showing how you might work with `table1`.
+
+```{r, out.width = "75%"}
+# Compute rate per 10,000
+table1 %>% 
+  mutate(rate = cases / population * 10000)
+
+# Compute cases per year
+table1 %>% 
+  count(year, wt = cases)
+
+# Visualise changes over time
+library(ggplot2)
+ggplot(table1, aes(year, cases)) + 
+  geom_line(aes(group = country), colour = "grey50") + 
+  geom_point(aes(colour = country))
+```
+
+## Pivoting
+
+In many datasets you need to resolve one of two common problems:
+
+1. One variable might be spread across multiple columns.
+
+1. One observation might be scattered across multiple rows.
+
+To fix these problems, you'll need the two most important functions in tidyr: `pivot_longer()` and `pivot_wider()`.
+
+### Longer
+
+A common problem is a dataset where some of the column names are not names of variables, but _values_ of a variable.
+
+```{r}
+table4a
+```
+
+To tidy a dataset like this, we need to __pivot__ the offending columns into a new pair of variables.
+
+```{r}
+table4a %>% 
+  pivot_longer(c('1999', '2000'), names_to = "year", values_to = "cases")
+```
+Note that "1999" and "2000" are non-syntactic names (because they don't start with a letter) so we have to surround them in backticks.
+
+`pivot_longer()` makes datasets _longer_ by _increasing the number of rows_ and decreasing the number of columns.
+
+We can use `pivot_longer()` to tidy `table4b` in a similar fashion.
+
+```{r}
+table4b %>% 
+  pivot_longer(c(`1999`, `2000`), names_to = "year", values_to = "population")
+```
+
+To combine the tidied versions of `table4a` and `table4b` into a single tibble, we need to use `dplyr::left_join()`, which you'll learn about in Chapter 13.
+
+```{r}
+tidy4a <- table4a %>% 
+  pivot_longer(c(`1999`, `2000`), names_to = "year", values_to = "cases")
+tidy4b <- table4b %>% 
+  pivot_longer(c(`1999`, `2000`), names_to = "year", values_to = "population")
+left_join(tidy4a, tidy4b)
+```
+
+### Wider
+
+`pivot_wider()` is the opposite of `pivot_longer()`, which is what you need in `table2`, because each observation is spread across two rows.
+
+```{r}
+table2
+```
+
+Now we have to make the dataset _wider_:
+
+```{r}
+table2 %>%
+    pivot_wider(names_from = type, values_from = count)
+```
+
+As you might have guessed from their names, `pivot_wider()` and `pivot_longer()` are complements. `pivot_longer()` makes wide tables narrower and longer; `pivot_wider()` makes long tables shorter and wider.
+
+## Separating and uniting
+
+### Separate
+
+`table3` has a different problem: we have one column (`rate`) that contains two variables (`cases` and `population`). To fix this problem, we'll need the `separate()` function.
+
+```{r}
+table3
+```
+
+The `rate` column contains both `cases` and `population` variables, and we need to split it into two variables. `separate()` takes the name of the column to separate, and the names of the columns to separate into.
+
+```{r}
+table3 %>% 
+  separate(rate, into = c("cases", "population"))
+```
+By default, `separate()` will split values wherever it sees a non-alphanumeric character (i.e. a character that isn't a number or letter).
+
+If you wish to use a specific character to separate a column, you can pass the character to the `sep` argument of `separate()`. Therefore, the following code does the same job.
+
+```{r eval = FALSE}
+table3 %>% 
+  separate(rate, into = c("cases", "population"), sep = "/")
+```
+
+Did you notice the data type for both cases and population? The default behaviour in `separate()` is to leave the type of the column as is. Alternatively, you can ask `separate` to _convert_ to better types as follows:
+
+```{r}
+table3 %>% 
+  separate(rate, into = c("cases", "population"), convert = TRUE)
+```
+
+You can also specify the exact positions where to split at, using a vector of integers.
+
+
+```{r}
+table3 %>% 
+  separate(year, into = c("century", "year"), sep = 2)
+```
+
+### Unite
+
+`unite()` is the inverse of `separate()`.
+
+```{r}
+table5 %>% 
+  unite(new, century, year)
+```
+
+In this case we also need to use the `sep` argument. The default will place an underscore (`_`) between the values from different columns.
+
+```{r}
+table5 %>% 
+  unite(new, century, year, sep = "")
+```
+
+
+## Missing values
+
+```{r}
+stocks <- tibble(
+  year   = c(2015, 2015, 2015, 2015, 2016, 2016, 2016),
+  qtr    = c(   1,    2,    3,    4,    2,    3,    4),
+  return = c(1.88, 0.59, 0.35,   NA, 0.92, 0.17, 2.66)
+)
+
+stocks
+```
+
+There are two missing values in this dataset!
+
+* The return for the fourth quarter of 2015 is _explicitly_ missing, because
+  the cell where its value should be instead contains `NA`.
+  
+* The return for the first quarter of 2016 is _implicitly_ missing, because it
+  simply does not appear in the dataset.
+  
+`spread` helps us making the implicit missing value explicit by putting years in the columns:
+
+```{r}
+stocks %>% 
+  spread(year, return)
+```
+
+Another important tool for making missing values explicit in tidy data is `complete()`:
+
+```{r}
+stocks %>% 
+  complete(year, qtr)
+```
+
+`complete()` takes a set of columns, and finds all unique combinations. It then ensures the original dataset contains all those values, filling in explicit `NA`s where necessary.
