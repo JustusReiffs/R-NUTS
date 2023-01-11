@@ -76,7 +76,8 @@ ggplot(data = mpg) +
 Pay attention to where you break the line when defining the layers in your `ggplot`-based plot.
 
 ```{r}
-ggplot(data = mpg) +  geom_point(mapping = aes(x = displ, y = hwy, shape = class))
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, shape = class))
 ```
 
 

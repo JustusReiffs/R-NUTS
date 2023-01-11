@@ -14,13 +14,11 @@ library(tidyverse)
 
 alldata <- read_csv("qog_eureg_wide1_nov20.csv")
 
-wasteHotels <- select(alldata, eu_tour_nstour_estbl_nuts1, eu_env_wasdsp_i_nuts1)
+alldata <- filter(alldata, year >= 1980)
 
-ggplot(data = wasteHotels) + 
-    geom_point(mapping = aes(x = eu_env_wasdsp_i_nuts1, y = eu_tour_nstour_estbl_nuts1))
+alldata
 ```
 
-Notizen:
-
-- tourismus - environment
-- vielleicht müll zu nummer von hotels
+# Notizen:
+- tourismus - environment -> müll zu nummer von hotels (kein gutes diagram)
+- health - education -> apotheker zu education 25 - 64
