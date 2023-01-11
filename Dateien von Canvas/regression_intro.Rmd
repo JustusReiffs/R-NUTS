@@ -1,0 +1,123 @@
+---
+title: "regression_intro"
+author: "Linda Urselmans"
+date: "26/11/2020"
+last edit: "04/10/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries and settings}
+library(readxl)
+library(ggplot2)
+options(scipen = 999) #set penalty for scientific notation high to disable it
+
+```
+
+
+```{r regression}
+ageandheight <- read_excel("Dateien von Canvas/ageandheight.xls") #load the data
+lmHeight = lm(height~age, data = ageandheight) #Create the linear regression
+summary(lmHeight) #Review the results
+ggplot(data=ageandheight,aes(age,height))+
+  geom_point()
+
+ggplot(data=ageandheight,aes(age,height))+
+  geom_point() +
+  geom_smooth(method='lm',formula=y~x)
+```
+
+```{r multiple regression}
+lmHeight2 = lm(height~age + no_siblings, data = ageandheight) #Create a linear regression with two variables
+summary(lmHeight2) #Review the results
+attributes(lmHeight2)
+lmHeight2$coefficients
+attach(ageandheight)
+plot(age,height)
+abline(lmHeight)
+confint(lmHeight,level=0.99)
+cor(age,height)
+par(mfrow=c(2,2))
+plot(lmHeight2)
+catHeight <- cut(height,breaks=c(60,65,70,75,80,85,90,95), labels=c("A","B","C","D","E","F","G"), right=FALSE)
+
+```
+
+
+```{r income example model}
+income <- read_excel("Dateien von Canvas/sampleData.xlsx")
+lmincome <- lm(income~age,data = income)
+ggplot(data=income,aes(age,income))+
+  geom_point() +
+  geom_smooth(method='lm',formula=y~x) 
+summary(lmincome)
+```
+```{r assumptions simple linear model}
+plot(lmincome)
+```
+
+
+```{r ggplot both models}
+ggplot(data=income,aes(age,income))+
+  geom_point() +
+  geom_smooth(method='lm',formula=y~x) +
+  geom_smooth(method = 'loess', formula=y~x , color="red")
+```
+
+```{r linear model with quadratic term}
+lmincome2 <- lm(income~age + I(age^2),data = income)
+summary(lmincome2)
+```
+
+```{r assumptions income with quadratic term}
+plot(lmincome2)
+```
+
+```{r F-Test on our two models}
+anova(lmincome,lmincome2)
+```
+
+
+```{r ggplot comparing a third model cubic}
+ggplot(data=income,aes(age,income))+
+  geom_point() +
+  geom_smooth(method='lm',formula=y~x) +
+  geom_smooth(method = 'lm', formula=y~poly(x,2), color="red")+
+  geom_smooth(method = 'lm', formula=y~poly(x,3), color="green")
+```
+
+
+```{r model with cubic}
+lmincome3 <- lm(income~age + I(age^2) + I(age^3),data = income)
+summary(lmincome3)
+
+```
+
+```{r assumptions cubic}
+plot(lmincome3)
+```
+
+
+```{r F-test model 2 v 3}
+anova(lmincome2,lmincome3)
+```
+
+```{r a 4th model?}
+ggplot(data=income,aes(age,income))+
+  geom_point() +
+  geom_smooth(method='lm',formula=y~x) +
+  geom_smooth(method = 'lm', formula=y~poly(x,2), color="red")+
+  geom_smooth(method = 'lm', formula=y~poly(x,3), color="green")+
+  geom_smooth(method = 'lm', formula=y~poly(x,4), color="orange")
+
+lmincome4 <- lm(income~age + I(age^2) + I(age^3) + I(age^4),data = income)
+summary(lmincome4)
+
+plot(lmincome4)
+
+anova(lmincome3,lmincome4)
+```
+

@@ -1,0 +1,51 @@
+---
+title: "Regression with categorical variables"
+author: "Linda Urselmans"
+date: '2022-10-11'
+output: html_document
+---
+
+## Part 3 - Categorical variables
+
+```{r prep}
+library(readxl)
+library(ggplot2)
+incomeEducation <- read_excel("Dateien von Canvas/incomeEducation.xls")
+```
+
+```{r regression with categorical variables}
+lminc <- lm(income~education,data=incomeEducation)
+summary(lminc)
+```
+
+```{r releveling our ordinal variable}
+ftable(incomeEducation$education)
+incomeEducation$education <- as.factor(incomeEducation$education)
+incomeEducation$education <- relevel(incomeEducation$education,ref = "None")
+
+```
+
+```{r regression with releveled factor}
+lminc <- lm(income~education,data=incomeEducation)
+summary(lminc)
+```
+
+But this still switches the order of HS and BA, because it defaults to alphabetic ordering.
+We can tackle this by encoding our variable using integers for example.
+
+```{r trying regression with numerical values}
+lminc <- lm(income~edu_num,data=incomeEducation)
+summary(lminc)
+ggplot(data=incomeEducation,aes(income,edu_num))+
+  geom_point() +
+  geom_smooth(method='lm',formula=y~x)
+```
+
+```{r}
+incomeEducation$edu_num <- as.factor(incomeEducation$edu_num)
+lminc <- lm(income~edu_num,data=incomeEducation)
+summary(lminc)
+ggplot(data=incomeEducation,aes(income,edu_num))+
+  geom_point() +
+  geom_smooth(method='lm',formula=y~x)
+```
