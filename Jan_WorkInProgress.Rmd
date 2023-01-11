@@ -14,5 +14,13 @@ library(tidyverse)
 
 alldata <- read_csv("qog_eureg_wide1_nov20.csv")
 
-colnames(alldata)
+wasteHotels <- select(alldata, eu_tour_nstour_estbl_nuts1, eu_env_wasdsp_i_nuts1)
+
+ggplot(data = wasteHotels) + 
+    geom_point(mapping = aes(x = eu_env_wasdsp_i_nuts1, y = eu_tour_nstour_estbl_nuts1))
 ```
+
+Notizen:
+
+- tourismus - environment
+- vielleicht müll zu nummer von hotels
