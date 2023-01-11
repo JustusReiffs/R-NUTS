@@ -1,5 +1,4 @@
-import
-```{r}
+```{r first try}
 library(tidyverse)
 
 csvdata <- read_csv("qog_eureg_wide1_nov20.csv")
@@ -8,4 +7,12 @@ lessdata <- select(csvdata, region_name, year)
 
 ggplot(data = lessdata) +
     geom_point(mapping = aes(x = year, y = region_name))
+```
+
+```{r first real data}
+library(tidyverse)
+
+alldata <- read_csv("qog_eureg_wide1_nov20.csv")
+
+colnames(alldata)
 ```
