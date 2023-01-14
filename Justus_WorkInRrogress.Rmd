@@ -64,10 +64,10 @@ nl_merge <- filter(nl_merge, year >= 2000 & year < 2019)
 pl_merge <- filter(pl_merge, year >= 2000 & year < 2019)
 
 ggplot() +
-  geom_line(data = ger_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "black")) +
-  geom_line(data = fr_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "blue")) +
-  geom_line(data = nl_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "orange")) +
-  geom_line(data = pl_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "red")) +
+  geom_line(data = ger_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "black"))
+  geom_line(data = fr_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "blue"))
+  geom_line(data = nl_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "orange"))
+  geom_line(data = pl_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "red"))
 ```
 
 ```{r}
@@ -78,34 +78,7 @@ str(info)
 colnames(info)
 ```
 
-
-
 ```{r}
-yearger <- select(germaninfo, region_name, year)
-yearfean <- select(feanceinfo, region_name, year)
-yeardutch <- select(dutchinfo, region_name, year)
-yearpol <- select(polishinfo, region_name, year)
 
-ger_fil <- select(yearger, )
-fr_fil <- select(yearfean, )
-nl_fil <- select(yeardutch, )
-pl_fil <- select(yearpol, )
-
-ger_fil <- select(ger_fil, ends_with("nuts0"))
-fr_fil <- select(fr_fil, ends_with("nuts0"))
-nl_fil <- select(nl_fil, ends_with("nuts0"))
-pl_fil <- select(pl_fil, ends_with("nuts0"))
-
-ger_merged <- bind_cols(yearger, ger_fil)
-fr_merged <- bind_cols(yearfean, fr_fil)
-nl_merged <- bind_cols(yeardutch, nl_fil)
-pl_merged <- bind_cols(yearpol, pl_fil)
-
-ger_merged <- filter(ger_merged, year >= 1960 & year < 2019)
-fr_merged <- filter(fr_merged, year >= 1960 & year < 2019)
-nl_merged <- filter(nl_merged, year >= 1960 & year < 2019)
-pl_merged <- filter(pl_merged, year >= 1960 & year < 2019)
-
-combined_data <- rbind(ger_merged, fr_merged, nl_merged, pl_merged)
 ```
 
