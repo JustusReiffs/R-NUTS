@@ -35,7 +35,7 @@ info <- read.csv("qog_eureg_wide1_nov20.csv")
 
 ger <- filter(info, region_name == "GERMANY")
 fr <- filter(info, region_name == "FRANCE")
-nl <- filter(info, region_name == "NEDERLAND")
+nl <- filter(info, region_name == "NETHERLANDS")
 pl <- filter(info, region_name == "POLAND")
 
 gerinfo <- select(ger, region_name, year)
@@ -64,10 +64,43 @@ nl_merge <- filter(nl_merge, year >= 2000 & year < 2019)
 pl_merge <- filter(pl_merge, year >= 2000 & year < 2019)
 
 ggplot() +
-  geom_line(data = ger_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "black"))
-  geom_line(data = fr_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "blue"))
-  geom_line(data = nl_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "orange"))
-  geom_line(data = pl_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "red"))
+  geom_line(data = ger_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "black")) +
+  geom_line(data = fr_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "blue")) +
+  geom_line(data = nl_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "orange")) +
+  geom_line(data = pl_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "red")) +
+  ggtitle("")
+```
+
+```{r rmployment rate }
+library(tidyverse)
+
+info <- read.csv("qog_eureg_wide1_nov20.csv")
+
+gerinfo <- filter(info, region_name == "GERMANY")
+
+spec <-  select(germaninfo, region_name, year)
+
+ger_fil <- select(gerinfo, eu_emp_1524f_nuts0:eu_emp_2534t_nuts0)
+
+ger_fil <- select(ger_fil, ends_with("nuts0"))
+
+ger_merge <- bind_cols(spec, ger_fil)
+
+ger_merge <- filter(ger_merge, year >= 1999 & year < 2019)
+
+ggplot(data = ger_merge) +
+  geom_bar(mapping = aes(x = year, y = eu_emp_1524f_nuts0, color = "Female 15-24 years old")) +
+  geom_bar(mapping = aes(x = year, y = eu_emp_1524m_nuts0, color = "Male 15-24 years old")) +
+  geom_bar(mapping = aes(x = year, y = eu_emp_2534f_nuts0, color = "Female 25-34 years old")) +
+  geom_bar(mapping = aes(x = year, y = eu_emp_2534m_nuts0, color = "Male 25-34 years old")) +
+  scale_color_manual(name = "Age Groups", values = c("Female 15-24 years old" = "#0000ff", "Male 15-24 years old" = "#7979ff","Female 25-34 years old" = "#e600ff", "Male 25-34 years old" = "#ff6ef8"))
+```
+
+```{r}
+info <- read.csv("qog_eureg_wide1_nov20.csv")
+
+gerinfo <- filter(info, region_name == "GERMANY")
+
 ```
 
 ```{r}
@@ -78,7 +111,7 @@ str(info)
 colnames(info)
 ```
 
-```{r}
+ geom_line(mapping = aes(x = year, y = eu_emp_2064f_nuts0, color = "Female 20-60 years old")) +
+  geom_line(mapping = aes(x = year, y = eu_emp_2064m_nuts0, color = "Male 20-60 years old")) +
 
-```
-
+   "Female 20-60 years old" = "#ff0000", "Male 20-60 years old" = "#ff7575", 
