@@ -1,4 +1,5 @@
-```{r education germany 2000 - 2018}
+
+```{r tidy data 1}
 library(tidyverse)
 
 alldata <- read_csv("qog_eureg_wide1_nov20.csv")
@@ -15,14 +16,16 @@ merged <- bind_cols(yearsData, filtered)
 
 merged <- filter(merged, year >= 2000 & year < 2019)
 
-merged
-
-# Diagram mit Männer und Frauen in Prozent, deren höchster Abschluss der Grundschulabschluss ist
-ggplot(data = merged) +
-    geom_line(mapping = aes(x = year, y = eu_edatt_ed02_y2564f_nuts0, color = "blue")) +
-    geom_line(mapping = aes(x = year, y = eu_edatt_ed02_y2564m_nuts0, color = "red"))
+colnames(merged)
 ```
 
-# Notizen:
-- tourismus - environment -> müll zu nummer von hotels (kein gutes diagram)
-- health - education -> apotheker zu education 25 - 64
+```{r show plot 1}
+ggplot(data = merged) +
+    geom_line(mapping = aes(x = year, y = eu_edatt_ed02_y2564f_nuts0, color = "Female")) +
+    geom_line(mapping = aes(x = year, y = eu_edatt_ed02_y2564m_nuts0, color = "Male")) +
+    geom_line(mapping = aes(x = year, y = eu_edatt_ed02_y2564t_nuts0, color = "Total")) +
+    xlab("Year") +
+    ylab("Percentage") +
+    ggtitle("Percentage of the population aged 25-64 whose highest qualification is elementary school graduation") +
+    scale_color_manual(name = "Groups", values = c("Female" = "blue", "Male" = "red", "Total" = "green"))
+```
