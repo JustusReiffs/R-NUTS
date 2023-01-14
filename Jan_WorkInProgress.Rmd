@@ -1,6 +1,7 @@
 
 ```{r tidy data 1}
 library(tidyverse)
+library(dplyr)
 
 alldata <- read_csv("qog_eureg_wide1_nov20.csv")
 
@@ -19,7 +20,7 @@ merged <- filter(merged, year >= 2000 & year < 2019)
 colnames(merged)
 ```
 
-```{r show plot 1}
+```{r plot 1}
 ggplot(data = merged) +
     geom_line(mapping = aes(x = year, y = eu_edatt_ed02_y2564f_nuts0, color = "Female")) +
     geom_line(mapping = aes(x = year, y = eu_edatt_ed02_y2564m_nuts0, color = "Male")) +
@@ -28,4 +29,24 @@ ggplot(data = merged) +
     ylab("Percentage") +
     ggtitle("Percentage of the population aged 25-64 whose highest qualification is elementary school graduation") +
     scale_color_manual(name = "Groups", values = c("Female" = "blue", "Male" = "red", "Total" = "green"))
+```
+
+```{r tidy data 2}
+library(tidyverse)
+library(dplyr)
+
+alldata <- read_csv("qog_eureg_wide1_nov20.csv")
+
+limited <- filter(alldata, year == 2015)
+
+filtered <- select(limited, region_name, region_code, year, eu_d2jan_t_nuts0, eu_edatt_ed02_y2564f_nuts0:eu_empl_edltotal_nuts0)
+
+onlyNuts0 <- filtered %>% select(region_name, region_code, year, ends_with("nuts0"))
+
+final <- onlyNuts0 %>% filter_all(all_vars(!is.na(.)))
+```
+
+```{r plot 2}
+ggplot(data = final, aes(x = region_code, y = eu_eduleave_t_nuts0)) +
+    geom_bar(stat = "identity", fill = "blue")
 ```
