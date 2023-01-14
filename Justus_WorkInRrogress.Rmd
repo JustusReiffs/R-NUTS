@@ -1,10 +1,27 @@
+
+To start we need to import the library. The library stores the comands wich are used to 
+visualize the data.
+
 ```{r}
 library(tidyverse)
 ```
 
+here the Dataset is imported, so it is posible to acces the information from it. 
+
 ```{r}
 info <- read.csv("qog_eureg_wide1_nov20.csv")
 ```
+
+This Part is used to compare the developpment of school early leavers for the time scince 
+2000 till 2019 for women and men.
+To Start the library is loadet and the datadet is opend into the system. Then before 
+visualisation the data gets filtert. To start that only the information of those rows is 
+accesed wich havethe region name GERMANY. Secont the information is selected so that there 
+is region name and the the year available. Further the limits are beeing set. Therefore 
+we filter futhere that only the walues we need are available. They are also filtert fore 
+the data from the "nuts0" part. then the seperat steps get combyned so there is only one 
+variable is needed to acces the information.
+The last part is the plot wich displayes the data. 
 
 ```{r comparison of erlyLevers for male and female}
 library(tidyverse)
@@ -24,9 +41,12 @@ merged <- bind_cols(specef, filtered)
 merged <- filter(merged, year >= 2000 & year < 2019)
 
 ggplot(data = merged) +
-  geom_line(mapping = aes(x = year, y = eu_eduleave_m_nuts0, color = "blue")) +
-  geom_line(mapping = aes(x = year, y = eu_eduleave_f_nuts0, color = "red"))
+  geom_line(mapping = aes(x = year, y = eu_eduleave_m_nuts0, color = "Female")) +
+  geom_line(mapping = aes(x = year, y = eu_eduleave_f_nuts0, color = "Male")) +
+  scale_color_manual(name = "Gender", values = c("Female" = "blue", "Male" = "red" ))
 ```
+
+
 
 ```{r regional educaton}
 library(tidyverse)
@@ -89,10 +109,10 @@ ger_merge <- bind_cols(spec, ger_fil)
 ger_merge <- filter(ger_merge, year >= 1999 & year < 2019)
 
 ggplot(data = ger_merge) +
-  geom_bar(mapping = aes(x = year, y = eu_emp_1524f_nuts0, color = "Female 15-24 years old")) +
-  geom_bar(mapping = aes(x = year, y = eu_emp_1524m_nuts0, color = "Male 15-24 years old")) +
-  geom_bar(mapping = aes(x = year, y = eu_emp_2534f_nuts0, color = "Female 25-34 years old")) +
-  geom_bar(mapping = aes(x = year, y = eu_emp_2534m_nuts0, color = "Male 25-34 years old")) +
+  geom_line(mapping = aes(x = year, y = eu_emp_1524f_nuts0, color = "Female 15-24 years old")) +
+  geom_line(mapping = aes(x = year, y = eu_emp_1524m_nuts0, color = "Male 15-24 years old")) +
+  geom_line(mapping = aes(x = year, y = eu_emp_2534f_nuts0, color = "Female 25-34 years old")) +
+  geom_line(mapping = aes(x = year, y = eu_emp_2534m_nuts0, color = "Male 25-34 years old")) +
   scale_color_manual(name = "Age Groups", values = c("Female 15-24 years old" = "#0000ff", "Male 15-24 years old" = "#7979ff","Female 25-34 years old" = "#e600ff", "Male 25-34 years old" = "#ff6ef8"))
 ```
 
