@@ -46,11 +46,11 @@ final <- onlyNuts0 %>% filter_all(all_vars(!is.na(.)))
 final$region_code_name <- paste(final$region_code, ":", final$region_name)
 ```
 
-```{r plot 2}
+```{r plot 2, fig.width=12, fig.height=8}
 ggplot(data = final, aes(x = region_code, y = eu_eduleave_t_nuts0, fill = region_code_name)) +
     geom_bar(stat = "identity") +
     xlab("Country") +
     ylab("Percentage in %") +
-    ggtitle("Percentage of people that are left education and training, age 18-24, 2015")+
+    ggtitle("Percentage of people that left education and training, age 18-24, 2015") +
     guides(fill = guide_legend(title = "Country code : Country name"))
 ```
