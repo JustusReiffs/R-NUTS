@@ -146,7 +146,7 @@ When we loaded all the data, we then can start filtering the rows we need. Here,
 
 ```{r}
 onlyGER3 <- alldata3[grep("DE", alldata3$region_code), ]
- 
+
 filtered3 <- onlyGER3[!grepl("GERMANY", onlyGER3$region_name), ]
 ```
 
@@ -184,3 +184,30 @@ ggplot(data = final3) +
 As the diagrams show, every annual disposable income has increased during that time period. Also, almost every region had an increase in people with higher education. However, Thuringia, Saxony and Saxony-Anhalt seem to have decreased their percentage of people with higher education over the years. A reason is that the wages are in former DDR regions lower than in the old german regions, and it could be that people with higher education moved into these regions because of higher wages. As we can see, Thuringia, Saxony and Saxony-Anhalt have all the lowest annual disposable income for people with higher education, directly followed by Mecklenburg-Western Pomerania, which is also a former DDR region.
 We can also see, that people with higher education have the highest annual disposable in Bavaria. High education in Bavaria is in Germany considered as the hardest to achieve. Therefore, the wages are accordingly higher than in other regions.
 We also see that high education does not necessarily mean high annual disposable income. Berlin, for example, has many people with high education, but the annual disposable income is there lower than it could expected.
+
+## Regression
+
+This part will carry out the multivariate regression. Here, the dataframe `final3` of the scatter plots in the last part are used to perform the regression.
+
+First, we will create a linear regression model of the dataframe by using the `lm()` command. After that, we generate the summary of that model:
+
+```{r}
+regmodel <- lm(eu_edatt_ed58_y2564t_nuts1 ~ year + eu_b6n_eur_hab_nuts1, data = final3)
+
+summary(regmodel)
+```
+
+As we can see, the residuals are symmetrically distributed while the median is close to zero, which means that the model is a good fit for the data.
+The independent variable, in this case the year and the annual disposable income, were found to be statistically significant in the model, with the p-values that can be observed in the summary. The coefficient for "year" is 0.3584, which means that for each year the dependent variable increases by 0.3584 units. As a contrast, the coefficient for the annual disposable income is -2.761e-04, which means that for each unit increase in the annual disposable income, the dependent variable decreases by -2.761e-04 units.
+The R-squared value of that model is 0.1007, which indicates that the independent variables, so year and the annual disposable income, explain about 10% of the variance in the dependent variable. The adjusted R-squared is 0.09443, which is a slight adjustment to R-squared that penalizes models with many predictors relative to the number of observations.
+The overall fit of the model is significant, as indicated by a low p-value of 2.681e-07 for the F-statistic.
+
+```{r}
+cor_matrix <- cor(final3[, c("year", "eu_edatt_ed58_y2564t_nuts1")])
+
+print(cor_matrix)
+
+library(corrplot)
+
+corrplot(cor_matrix)
+```
