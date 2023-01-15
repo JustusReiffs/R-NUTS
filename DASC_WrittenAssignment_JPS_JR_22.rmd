@@ -3,25 +3,79 @@
 This report was written to gather a better insight about general educational data about countries in Europe.
 
 This report is divided into two major parts: </br>
-- The first part, which is written by Justus Reiffs </br>
-- The second part, which is written by Jan Pinto Strohhäusl </br>
+- The first part, which contains various data tidying and visualizations by both Justus and Jan
+- The second part, which is written individually and contains the regression </br>
 
-We will now start with the part written by Justus Reiffs, which will be followed by the part which was written by Jan Pinto Strohhäusl.
+We will now start with the first part. Here, each person wrote a little section about the process of tidying and visualisation. The creator of each section is mentioned in the title of the section. 
 
+## 1. Early Leavers in Germany, differences in genders since 2000 - written by Justus Reiffs
 
--- hier Text von Justus einfügen --
+This Part is used to compare the developement of school early leavers for the time since 
+2000 till 2019 for women and men.
 
+### 1.1 Set up / Gather Data 
 
+To start we need to import the library. The library stores the commands which are used to 
+handle the data.
 
-# Part 2: Jan Pinto Strohhäusl
+```{r}
+library(tidyverse)
+```
 
-The following text, diagrams and code was, if not stated otherwise, created and written by Jan Pinto Strohhäusl. This chapter will discuss different educational values of countries while also providing diagrams to that values. The regression part can be found later on.
+Here the Dataset is imported, so it is possible to access the information from it. 
 
-## Amount of early leavers in Europe
+```{r}
+info <- read.csv("qog_eureg_wide1_nov20.csv")
+```
+
+Then before visualisation the data gets filtered. To start that only the information of 
+those rows is accesed which have the region name GERMANY. Second, the information is selected 
+so that there is region name and the the year available. Further, the limits are being set. 
+Therefore, we filter futher that only the values we need are available. They are also 
+filtered for the data from the "nuts0" part. Then the separat steps get combined so there 
+is only one variable is needed to access the information.
+
+```{r}
+germaninfo <- filter(info, region_name == "GERMANY")
+
+specef <- select(germaninfo, region_name, year)
+
+filtered <- select(germaninfo, eu_eduleave_m_nuts0:eu_eduleave_f_nuts0)
+
+filtered <- select(filtered, ends_with("nuts0"))
+
+merged <- bind_cols(specef, filtered)
+
+merged <- filter(merged, year >= 2000 & year < 2019)
+```
+
+### 1.2 Display diagramm
+
+After the data is available and tidy so that it is more practical the plot can be build. 
+So this following code will generate a plot that shows the the developement of the data.
+
+```{r comparison of erlyLevers for male and female}
+ggplot(data = merged) +
+  geom_line(mapping = aes(x = year, y = eu_eduleave_m_nuts0, color = "Female")) +
+  geom_line(mapping = aes(x = year, y = eu_eduleave_f_nuts0, color = "Male")) +
+  scale_color_manual(name = "Gender", values = c("Female" = "blue", "Male" = "red")) +
+  ggtitle("Comparison of erlylevers in education for Female and male") +
+  xlab("Time in years(2000-2019)") +
+  ylab("Percentage of erly levers")
+```
+
+The diagramm shows the developement of early leavers from education and training in percentage
+in the time between 2000 and 2019 in comparison for male and female gender. 
+In the beginning there where more male leavers than female leavers which turned after a 
+couple years. So before 2005 the amount of female increased more than the amount of the males 
+that quit early. In general the amount of eraly leavers is decreaseing but the amount of females is 
+much higher than the amount if males in 2019.
+
+## 2. Amount of early leavers in Europe - written by Jan Pinto Strohhäusl
 
 This part will focus on the amount of young people aged 18 - 24, which left any education and training and are not participating in any education and training.
 
-### Gather and tidy data
+### 2.1 Gather and tidy data
 
 Before generating a diagram and discussing it, we first need to gather the relating data. We first import the `tidyverse`-library, because this library is the most common library used to transform and visualize data:
 
@@ -62,7 +116,7 @@ final1$region_code_name <- paste(final1$region_code, ":", final1$region_name)
 
 Now that we have our final dataframe, we can then generate the diagram.
 
-### Display diagram
+### 2.2 Display diagram
 
 The following code will generate a bar chart diagram. The reason why it is a bar chart is so we can clearly see the differences between countries:
 
@@ -77,11 +131,91 @@ ggplot(data = final1, aes(x = region_code, y = eu_eduleave_t_nuts0, fill = regio
 
 Here, we see that most of the countries are fairly near to each other. However, Turkey is the country with the most young people who left education and training. As a contrast, Croatia has most of its young people in education and training. As a matter of fact, most balkan countries are in the lower area of the bar chart. For me, there is not a apparent reason for that. Maybe they are more engaged to get a higher degree as other countries, so they can live a better life, or they are learning earlier how to craft, so they have early a secure job.
 
-## No educational attainment in Germany
+## 3. Employment rate for age between 15-34 in Europe - written by Justus Reiffs
+
+In this part the Employment rate for Germany, France, Netherlands and Poland is going to 
+be compared.
+
+### 3.1 Set up / Gather Data 
+
+First, it is important to load the library. In this case it is the tidyverse library.
+
+```{r}
+library(tidyverse)
+```
+
+Here the dataset is accessed and read. The information is stored in the variable "info".
+
+```{r}
+info <- read.csv("qog_eureg_wide1_nov20.csv")
+```
+
+To continue the data needs to be tidy. So in this case the data for each country gets 
+filtered and stored in an own variable. After that the information for each country gets 
+selected and specified further. 
+
+```{r regional educaton}
+ger <- filter(info, region_name == "GERMANY")
+fr <- filter(info, region_name == "FRANCE")
+nl <- filter(info, region_name == "NETHERLANDS")
+pl <- filter(info, region_name == "POLAND")
+
+gerinfo <- select(ger, region_name, year)
+frinfo <- select(fr, region_name, year)
+nlinfo <- select(nl, region_name, year)
+plinfo <- select(pl, region_name, year)
+
+ger_fil <- select(ger, eu_empl_durtotal_nuts0:eu_neet_y1524t_nuts0)
+fr_fil <- select(fr, eu_empl_durtotal_nuts0:eu_neet_y1524t_nuts0)
+nl_fil <- select(nl, eu_empl_durtotal_nuts0:eu_neet_y1524t_nuts0)
+pl_fil <- select(pl, eu_empl_durtotal_nuts0:eu_neet_y1524t_nuts0)
+
+ger_fil <- select(ger_fil, ends_with("nuts0"))
+fr_fil <- select(fr_fil, ends_with("nuts0"))
+nl_fil <- select(nl_fil, ends_with("nuts0"))
+pl_fil <- select(pl_fil, ends_with("nuts0"))
+
+ger_merge <- bind_cols(gerinfo, ger_fil)
+fr_merge <- bind_cols(frinfo, fr_fil)
+nl_merge <- bind_cols(nlinfo, nl_fil)
+pl_merge <- bind_cols(plinfo, pl_fil)
+
+ger_merge <- filter(ger_merge, year >= 2000 & year < 2019)
+fr_merge <- filter(fr_merge, year >= 2000 & year < 2019)
+nl_merge <- filter(nl_merge, year >= 2000 & year < 2019)
+pl_merge <- filter(pl_merge, year >= 2000 & year < 2019)
+```
+
+### 3.2 Display diagramm
+
+To create the plot the ggplot function is used. Than there are vour values displayed in 
+comparison. 
+
+```{r}
+ggplot() +
+  geom_line(data = ger_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "Germany")) +
+  geom_line(data = fr_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "France")) +
+  geom_line(data = nl_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "Netherlands")) +
+  geom_line(data = pl_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "Poland")) +
+  scale_color_manual(name = "Gender", values = c("Germany" = "black", "France" = "blue", "Netherlands" = "orange", "Poland" = "red")) +
+  ggtitle("Employment rate for 15-34 jears in Germany, France, Netherlands and Poland scince 2000") +
+  xlab("Time in years(2000-2019)") +
+  ylab("Employment rate for people between 15 and 34")
+```
+
+The generated diagram displayes the employment rate for people between the age of 15 and 34 
+in comparison for Germany, France, Netherlands and Poland over the time between 2000 and 2019.
+In the start the Employmentrate in Poland is the lowest while the Employmentrate in the 
+Netherlands is the highest. Around 2002 the Rate in Poland increased and grows over 75. While 
+after 2007 the Employmentrate in France decreased. The german Employmentrate in the beginning 
+decreased till 2005. After 2005 the rate increased. In the end the Emplomentrate in the 
+Netherlands is the highest followed by Germany and Poland while France has the lowest.
+
+## 4. No educational attainment in Germany - written by Jan Pinto Strohhäusl
 
 This part will show and discuss the percentage of people in Germany who have not graduated from primary school or completed lower secondary education.
 
-### Gather and tidy data
+### 4.1 Gather and tidy data
 
 Like in the first part, we first start with loading the library `tidyverse`:
 
@@ -122,7 +256,7 @@ final2 <- filter(filtered2, year >= 2000 & year < 2019)
 
 The `final2`-variable now has year and the necessary columns saved, without any null values. Now we can generate a diagram for that dataframe.
 
-### Display diagram
+### 4.2 Display diagram
 
 Now that we have the data we need, we can create the diagram. I chose the `geom_line` style, because we want to look at a difference over time, and that is the style that is the most suitable for that kind of diagram.
 
@@ -139,11 +273,70 @@ ggplot(data = final2) +
 
 As we can see, the amount of people how do not have a lower graduation has decreased over that time frame. However, when we look closely, we can see that there is a strong increase in every group between 2005 and 2007. This can correlate to the finance crisis, which was at that time, resulting in german children not being send to school. Interestingly, the percentage of female people is way higher than the percentage of male people. However, the amount of female people not having a lower degree has dropped significantly over the time. We can see a slight increase in the total percentage after 2015. This corrolates to the refugee crisis, which started in 2015 and was at its peak in early 2016. We also see that the male proportion was heavily increased by that, while the female proportion was only slightly affected. However, we do see that the total amount already again starts to decrease.
 
-## Higher education to income comparison in Germany
+## 5. Employment rate in germany for Male and Female - written by Justus Reiffs
+
+In this part the development of the Employmentrate for female and male is compared. Therefore 
+the Employmentrate of 15-24 years old and 25-34 years old is compared in the time from 1999-2019.
+
+### 5.1 Set up / Gather Data 
+
+To start the library is loaded. The libary used is the tidyvers libary because it is one of 
+the most common ones. 
+
+```{r}
+library(tidyverse)
+```
+
+Here the dataset is made available and read. After it has been imported to the info variable.
+
+```{r}
+info <- read.csv("qog_eureg_wide1_nov20.csv")
+```
+
+Here the data is filtered and tidyed so that only the relevant parts can be seen in the 
+plot. The data gets limited for the german values and further selected foe the specific 
+factors and the years that are under investigation.
+
+```{r}
+gerinfo <- filter(info, region_name == "GERMANY")
+
+spec <- select(germaninfo, region_name, year)
+
+ger_fil <- select(gerinfo, eu_emp_1524f_nuts0:eu_emp_2534t_nuts0)
+
+ger_fil <- select(ger_fil, ends_with("nuts0"))
+
+ger_merge <- bind_cols(spec, ger_fil)
+
+ger_merge <- filter(ger_merge, year >= 1999 & year < 2019)
+```
+
+### 5.2 Display diagramm
+
+In the following the plot is created using the ggplot.
+
+```{r rmployment rate }
+ggplot(data = ger_merge) +
+  geom_line(mapping = aes(x = year, y = eu_emp_1524f_nuts0, color = "Female 15-24 years old")) +
+  geom_line(mapping = aes(x = year, y = eu_emp_1524m_nuts0, color = "Male 15-24 years old")) +
+  geom_line(mapping = aes(x = year, y = eu_emp_2534f_nuts0, color = "Female 25-34 years old")) +
+  geom_line(mapping = aes(x = year, y = eu_emp_2534m_nuts0, color = "Male 25-34 years old")) +
+  scale_color_manual(name = "Age Groups", values = c("Female 15-24 years old" = "#0000ff", "Male 15-24 years old" = "#7979ff", "Female 25-34 years old" = "#e600ff", "Male 25-34 years old" = "#ff6ef8")) +
+  ggtitle("Employment rate for 15 to 24 jears old and 25 to 34 in Germany between 1999 and 2019") +
+  xlab("Time in years(1999-2019)") +
+  ylab("Employment rate")
+```
+
+The diagram shows the Employmentrate for male and female in comparison of there gender and 
+their age. The first age is 15 to 24 years old and the second is for 25 to 34 years old. 
+The rate for the 25-34 years old in general is huger than the one for 15 to 34 years old. 
+Also for both groups the rate for the female group is much lower than the rate for the male.
+
+## 6. Higher education to income comparison in Germany - written by Jan Pinto Strohhäusl
 
 This part will show and discuss how higher education and annual disposable income per inhabitant correlate together.
 
-### Gather and tidy data
+### 6.1 Gather and tidy data
 
 We first start with loading the `tidyverse`-library: 
 
@@ -183,11 +376,11 @@ The `final3`-variable results into a dataframe which holds data to the topic fro
 final3 <- filter(final3, year >= 2000 & year < 2018)
 ```
 
-### Display diagram
+### 6.2 Display diagram
 
 The following code displays scatter plots. Each region in Germany has their own scatter plot, and there can be seen a change in every scatter plot over time:
 
-```{r fig.width=10, fig.height=10}
+```{r fig.width=10, fig.height=15}
 ggplot(data = final3) +
     geom_point(mapping = aes(x = eu_edatt_ed58_y2564t_nuts1, y = eu_b6n_eur_hab_nuts1, size = year)) +
     facet_wrap(~region_name) +
@@ -200,7 +393,13 @@ As the diagrams show, every annual disposable income has increased during that t
 We can also see, that people with higher education have the highest annual disposable in Bavaria. High education in Bavaria is in Germany considered as the hardest to achieve. Therefore, the wages are here higher than in other regions.
 We also see that high education does not necessarily mean high annual disposable income. Berlin, for example, has many people with high education, but the annual disposable income is there lower than it could expected.
 
-## Regression
+# Part 2: Regression - written by Justus Reiffs and Jan Pinto Strohhäusl
+
+The following part will include the regression analysis of both Justus and Jan. The author of each regression is clearly marked.
+
+## Regression - written by Jan Pinto Strohhäusl 
+
+The following text, diagrams and code was created and written by Jan Pinto Strohhäusl.
 
 This part will carry out the multivariate regression. Here, the dataframe `final3` of the scatter plots in the last part are used to perform the regression.
 
@@ -262,3 +461,7 @@ plot(regmodel, which = 3)
 As the diagram shows, the model is a homoscedastic model, because the residuals are again randomly scattered with no obvious pattern. This means that the homoscedasticity assumption is met, which means that variance of the residuals are constant, which also indicates that the model could be acceptable.
 
 To sum all the regression up, the model is fitting for the data, even though the R-squared value in the summary is lower than what would be considered as acceptable.
+
+## Regression - written by Justus Reiffs
+
+-- hier Regression einfügen --
