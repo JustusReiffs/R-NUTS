@@ -1,0 +1,264 @@
+# DASC1 Report, Justus Reiffs, Jan Pinto Strohhäusl
+
+This report was written to gather a better insight about general educational data about countries in Europe.
+
+This report is divided into two major parts: </br>
+- The first part, which is written by Justus Reiffs </br>
+- The second part, which is written by Jan Pinto Strohhäusl </br>
+
+We will now start with the part written by Justus Reiffs, which will be followed by the part which was written by Jan Pinto Strohhäusl.
+
+
+-- hier Text von Justus einfügen --
+
+
+
+# Part 2: Jan Pinto Strohhäusl
+
+The following text, diagrams and code was, if not stated otherwise, created and written by Jan Pinto Strohhäusl. This chapter will discuss different educational values of countries while also providing diagrams to that values. The regression part can be found later on.
+
+## Amount of early leavers in Europe
+
+This part will focus on the amount of young people aged 18 - 24, which left any education and training and are not participating in any education and training.
+
+### Gather and tidy data
+
+Before generating a diagram and discussing it, we first need to gather the relating data. We first import the `tidyverse`-library, because this library is the most common library used to transform and visualize data:
+
+```{r}
+library(tidyverse)
+```
+
+Then, we import the dataset from the CSV-File in our `alldata1`-variable:
+
+```{r}
+alldata1 <- read_csv("qog_eureg_wide1_nov20.csv")
+```
+
+Now that we have our data, we first need set a specific year, because we do not want to see a change over time, but data from a specific year. To accomodate missing data, I chose the year 2015, because that is a fairly new year, so that data is still relevant. Also, the reason I chose 2015 is because the years after 2015 tend to lack data, so I settled at 2015 to just to be sure that there will be data:
+
+```{r}
+limited1 <- filter(alldata1, year == 2015)
+```
+
+Then, we can filter out the columns we need. That would be the country name, the two-letter code of the country and the column that holds the data: 
+
+```{r}
+filtered1 <- select(limited1, region_name, region_code, eu_eduleave_t_nuts0)
+```
+
+We only want to use countries that have data, so we delete all countries from the dataframe that have no data for that specific context:
+
+```{r}
+final1 <- filtered1 %>% filter_all(all_vars(!is.na(.)))
+```
+
+Conveniantly, this also deletes rows that were specified to hold data about regions. However, they are not needed here. </br>
+For the last step, we need to create a new row in our dataframe. This way, we can later in the diagram generate a legend.
+
+```{r}
+final1$region_code_name <- paste(final1$region_code, ":", final1$region_name)
+```
+
+Now that we have our final dataframe, we can then generate the diagram.
+
+### Display diagram
+
+The following code will generate a bar chart diagram. The reason why it is a bar chart is so we can clearly see the differences between countries:
+
+```{r fig.width=12, fig.height=8}
+ggplot(data = final1, aes(x = region_code, y = eu_eduleave_t_nuts0, fill = region_code_name)) +
+    geom_bar(stat = "identity") +
+    xlab("Country") +
+    ylab("Percentage in %") +
+    ggtitle("Percentage of people that left education and training, age 18-24, 2015") +
+    guides(fill = guide_legend(title = "Country code : Country name"))
+```
+
+Here, we see that most of the countries are fairly near to each other. However, Turkey is the country with the most young people who left education and training. As a contrast, Croatia has most of its young people in education and training. As a matter of fact, most balkan countries are in the lower area of the bar chart. For me, there is not a apparent reason for that. Maybe they are more engaged to get a higher degree as other countries, so they can live a better life, or they are learning earlier how to craft, so they have early a secure job.
+
+## No educational attainment in Germany
+
+This part will show and discuss the percentage of people in Germany who have not graduated from primary school or completed lower secondary education.
+
+### Gather and tidy data
+
+Like in the first part, we first start with loading the library `tidyverse`:
+
+```{r}
+library(tidyverse)
+```
+
+Then, we import our dataset, which is saved in the CSV-File:
+
+```{r}
+alldata2 <- read_csv("qog_eureg_wide1_nov20.csv")
+```
+
+Now, we have a variable called `alldata2`, which holds all the data from the imported dataset. However, to generate our diagram, we need to tidy it up, because there is data, which we will not use. </br>
+First, we filter only the data that is related to Germany, because that is the data we are interested in:
+
+```{r}
+onlyGER2 <- filter(alldata2, region_name == "GERMANY")
+```
+
+Because here is data, that we also do not need, we then filter the columns to the columns we need. That would be the year and the values that hold the data about the percentage:
+
+```{r}
+filtered2 <- select(onlyGER2, year, eu_edatt_ed02_y2564f_nuts0:eu_edatt_ed02_y2564t_nuts0)
+```
+
+Now we still have columns, that are empty. The reason why there are columns that are empty is because how the dataset is set up. There are two seperate columns for each data: a column for the whole country (marked as "NUTS0"), and a column for a specific region in that country (marked as "NUTS1"). However, the dataset is set up in such a way, that each row takes both columns, creating null values. To accomodate this, we need to filter out the columns that are intended to use for regions. This is because we want to look at Germany as a whole, and are not in need of region specific data:
+
+```{r}
+filtered2 <- filtered2 %>% select(year, ends_with("nuts0"))
+```
+
+The final step now is to set the right time frame. The reason we do this is because there is only data available in a specific time frame, which is between 2000 and 2018. In order to set the right time frame, we need to filter again:
+
+```{r}
+final2 <- filter(filtered2, year >= 2000 & year < 2019)
+```
+
+The `final2`-variable now has year and the necessary columns saved, without any null values. Now we can generate a diagram for that dataframe.
+
+### Display diagram
+
+Now that we have the data we need, we can create the diagram. I chose the `geom_line` style, because we want to look at a difference over time, and that is the style that is the most suitable for that kind of diagram.
+
+```{r}
+ggplot(data = final2) +
+    geom_line(mapping = aes(x = year, y = eu_edatt_ed02_y2564f_nuts0, color = "Female")) +
+    geom_line(mapping = aes(x = year, y = eu_edatt_ed02_y2564m_nuts0, color = "Male")) +
+    geom_line(mapping = aes(x = year, y = eu_edatt_ed02_y2564t_nuts0, color = "Total")) +
+    xlab("Year") +
+    ylab("Percentage in %") +
+    ggtitle("Percentage of people with no educational attainment, age 25-64, 2000-2018") +
+    scale_color_manual(name = "Groups", values = c("Female" = "blue", "Male" = "red", "Total" = "green"))
+```
+
+As we can see, the amount of people how do not have a lower graduation has decreased over that time frame. However, when we look closely, we can see that there is a strong increase in every group between 2005 and 2007. This can correlate to the finance crisis, which was at that time, resulting in german children not being send to school. Interestingly, the percentage of female people is way higher than the percentage of male people. However, the amount of female people not having a lower degree has dropped significantly over the time. We can see a slight increase in the total percentage after 2015. This corrolates to the refugee crisis, which started in 2015 and was at its peak in early 2016. We also see that the male proportion was heavily increased by that, while the female proportion was only slightly affected. However, we do see that the total amount already again starts to decrease.
+
+## Higher education to income comparison in Germany
+
+This part will show and discuss how higher education and annual disposable income per inhabitant correlate together.
+
+### Gather and tidy data
+
+We first start with loading the `tidyverse`-library: 
+
+```{r}
+library(tidyverse)
+```
+
+Then, we import all the data from the CSV-File into out `alldata3`-variable:
+
+```{r}
+alldata3 <- read_csv("qog_eureg_wide1_nov20.csv")
+```
+
+When we loaded all the data, we then can start filtering the rows we need. Here, because we want to look at the regional differences in Germany, we need every row that holds regional data about Germany. So we first filter all rows that belongs to Germany, regardless of whether it is a regional row or a row about the whole country. Then, we delete all rows that holds data about the whole country, because these are not relevant to us:
+
+```{r}
+onlyGER3 <- alldata3[grep("DE", alldata3$region_code), ]
+
+filtered3 <- onlyGER3[!grepl("GERMANY", onlyGER3$region_name), ]
+```
+
+Now we can filter all the rows we need. In our comparison, we need the region name, the year, the percentage of people between the ages of 25 - 64 that have completed a tertiary education and the average annual disposable income of each inhabitant:
+
+```{r}
+filtered3 <- select(filtered3, region_name, year, eu_edatt_ed58_y2564t_nuts1, eu_b6n_eur_hab_nuts1)
+```
+
+Now that we still have rows that do not hold data, we can filter them out. That results into a dataframe, that we use later to display the diagram:
+
+```{r}
+final3 <- filtered3 %>% filter_all(all_vars(!is.na(.)))
+```
+
+The `final3`-variable results into a dataframe which holds data to the topic from the years 2000 to 2017. To be sure that the values are indeed between 2000 to 2017, we can still filter them:
+
+```{r}
+final3 <- filter(final3, year >= 2000 & year < 2018)
+```
+
+### Display diagram
+
+The following code displays scatter plots. Each region in Germany has their own scatter plot, and there can be seen a change in every scatter plot over time:
+
+```{r fig.width=10, fig.height=10}
+ggplot(data = final3) +
+    geom_point(mapping = aes(x = eu_edatt_ed58_y2564t_nuts1, y = eu_b6n_eur_hab_nuts1, size = year)) +
+    facet_wrap(~region_name) +
+    xlab("Percentage in %") +
+    ylab("Euro in €") +
+    ggtitle("Income and tertiary Education in Germany: Regional Comparison, 2000-2017")
+```
+
+As the diagrams show, every annual disposable income has increased during that time period. Also, almost every region had an increase in people with higher education. However, Thuringia, Saxony and Saxony-Anhalt seem to have decreased their percentage of people with higher education over the years. A reason is that the wages are in former DDR regions lower than in the old german regions, and it could be that people with higher education moved from these regions into regions with higher wages. As we can see, Thuringia, Saxony and Saxony-Anhalt have all the lowest annual disposable income for people with higher education, directly followed by Mecklenburg-Western Pomerania, which is also a former DDR region.
+We can also see, that people with higher education have the highest annual disposable in Bavaria. High education in Bavaria is in Germany considered as the hardest to achieve. Therefore, the wages are here higher than in other regions.
+We also see that high education does not necessarily mean high annual disposable income. Berlin, for example, has many people with high education, but the annual disposable income is there lower than it could expected.
+
+## Regression
+
+This part will carry out the multivariate regression. Here, the dataframe `final3` of the scatter plots in the last part are used to perform the regression.
+
+First, we load the needed library. Then, we will create a linear regression model of the dataframe by using the `lm()` command. Here, we define the percentage of people with high education as our dependent variable, while the year and the annual disposable income are the independent variables. After that, we generate the summary of that model:
+
+```{r}
+library(car)
+
+regmodel <- lm(eu_edatt_ed58_y2564t_nuts1 ~ year + eu_b6n_eur_hab_nuts1, data = final3)
+
+summary(regmodel)
+```
+
+As we can see, the residuals are symmetrically distributed while the median is close to zero, which means that the model could be a good fit for the data.
+The independent variables were found to be statistically significant in the model, with the p-values that can be observed in the summary. The coefficient for year is 0.3584, which means that for each year the dependent variable increases by 0.3584 units. As a contrast, the coefficient for the annual disposable income is -2.761e-04, which means that for each unit increase in the annual disposable income, the dependent variable decreases by -2.761e-04 units.
+The R-squared value of that model is 0.1007, which indicates that the independent variables explain about 10% of the variance in the dependent variable. The adjusted R-squared is 0.09443, which is a slight adjustment to R-squared that penalizes models with many predictors relative to the number of observations.
+The overall fit of the model could be significant, as indicated by a low p-value of 2.681e-07 for the F-statistic.
+To sum this summary up, the model could be a good fit for the data. However, the R-squared value is relatively low, indicating that the independent variables could only explain a small proportion of the variance in the dependent variable.
+
+To make sure that the model does not have strong correlation, we use the following code:
+```{r}
+cor_matrix <- cor(final3[, c("year", "eu_edatt_ed58_y2564t_nuts1")])
+
+print(cor_matrix)
+```
+
+The printed matrix shows that there is a weak positive correlation between the year and the percentage of higher education. This suggest that there is some association between the two variables, but it is not significant.
+
+Also, we need to check for strong collinearity. For this, we run the following code:
+
+```{r}
+vif(regmodel)
+```
+
+This outputs a weak collinearity between the independent variables. However, it is not a high value, because values between 1 and 5 show a weak, but not heavily significant collinearity. Therefore, this value can be considered acceptable.
+
+Now we can have a more in-depth sight into the summary of the model. We first look into the Residuals vs Fitted diagram of that model. To generate that diagram, we run the following code:
+
+```{r}
+plot(regmodel, which = 1)
+```
+
+As we can see, here is no obvious pattern by the red line, which indicates an almost perfect scenario. Also, the variance is constant, which can be seen by the residuals being randomly scattered around the horizontal line at zero.
+
+We also check the normality assumption of our regression model. The following code generates the "Normal Q-Q" diagram:
+
+```{r}
+plot(regmodel, which = 2)
+```
+
+We see that the graph does not form a curved pattern, which means that the data is normal distributed. However, we do notice that the diagram has a so called "heavy tail", which means that the points at the lower end deviate from the dotted middle line. This indicates that the data has a negative skewness, which is a measure of the asymmetry of a probability distribution of a random variable about its mean. The negative skewness indicates that the data has more values on the left side of the mean than on the right side. Besides that, the diagram is not conspicuous regarding the normality of the data, which means the model can here be considered as acceptable.
+
+We can also check the Homoscedasticity of the model by creating the following diagram:
+
+```{r}
+plot(regmodel, which = 3)
+```
+
+As the diagram shows, the model is a homoscedastic model, because the residuals are again randomly scattered with no obvious pattern. This means that the homoscedasticity assumption is met, which means that variance of the residuals are constant, which also indicates that the model could be acceptable.
+
+To sum all the regression up, the model is fitting for the data, even though the R-squared value in the summary is lower than what would be considered as acceptable.
