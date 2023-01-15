@@ -1,6 +1,6 @@
 # Part Jan Pinto Strohhäusl
 
-The following text was, if not stated otherwise, written by Jan Pinto Strohhäusl. This chapter will discuss different educational values of countries.
+The following text, diagrams and code was, if not stated otherwise, created and written by Jan Pinto Strohhäusl. This chapter will discuss different educational values of countries while also providing diagrams to that values. The regression part can be found later on.
 
 ## Amount of early leavers in Europe
 
@@ -8,8 +8,7 @@ This part will focus on the amount of young people aged 18 - 24, which left any 
 
 ### Gather and tidy data
 
-Before generating a diagram and discussing it, we first need to gather the relating data.
-We first import the `tidyverse`-library, because this library is the most common library used to transform and visualize data:
+Before generating a diagram and discussing it, we first need to gather the relating data. We first import the `tidyverse`-library, because this library is the most common library used to transform and visualize data:
 
 ```{r}
 library(tidyverse)
@@ -21,25 +20,25 @@ Then, we import the dataset from the CSV-File in our `alldata1`-variable:
 alldata1 <- read_csv("qog_eureg_wide1_nov20.csv")
 ```
 
-Now that we have our data, we first need set a specific year, because we do not want to see a change over time, but a data from a specific year. To accomodate missing data, I chose the year 2015, because that is a fairly new year, so that data is still relevant. Also, the reason I chose 2015 is because the years after 2015 tend to lack data, so I settled at 2015 to just to be sure that there will be data:
+Now that we have our data, we first need set a specific year, because we do not want to see a change over time, but data from a specific year. To accomodate missing data, I chose the year 2015, because that is a fairly new year, so that data is still relevant. Also, the reason I chose 2015 is because the years after 2015 tend to lack data, so I settled at 2015 to just to be sure that there will be data:
 
 ```{r}
 limited1 <- filter(alldata1, year == 2015)
 ```
 
-Then, we can filter out the columns we need. That would be the two-letter code of the country, the country name and the columns that holds the data: 
+Then, we can filter out the columns we need. That would be the country name, the two-letter code of the country and the column that holds the data: 
 
 ```{r}
 filtered1 <- select(limited1, region_name, region_code, eu_eduleave_t_nuts0)
 ```
 
-We only need data that relates to a country, not a region. However, we still have rows that are regions of a country. To filter these out, we enter the following command:
+We only can use countries that have data, so we delete all countries from the dataframe that have no data for that specific context:
 
 ```{r}
 final1 <- filtered1 %>% filter_all(all_vars(!is.na(.)))
 ```
 
-Conveniantly, this also deletes all countries from the dataframe that have no data for that specific context. For the last step, we need to create a new row in our dataframe. This way, we can later in the diagram generate a legend.
+Conveniantly, this also deletes rows that were specified to hold data about regions. However, they are not need here. For the last step, we need to create a new row in our dataframe. This way, we can later in the diagram generate a legend.
 
 ```{r}
 final1$region_code_name <- paste(final1$region_code, ":", final1$region_name)
@@ -87,7 +86,7 @@ First, we filter only the data that is related to Germany, because that is the d
 onlyGER2 <- filter(alldata2, region_name == "GERMANY")
 ```
 
-Because here is data, that we also do not need, we then filter the columns to the columns we need:
+Because here is data, that we also do not need, we then filter the columns to the columns we need. That would be the year and the values that hold the data about the percentage:
 
 ```{r}
 filtered2 <- select(onlyGER2, year, eu_edatt_ed02_y2564f_nuts0:eu_edatt_ed02_y2564t_nuts0)
@@ -109,7 +108,7 @@ The `final2`-variable now has year and the necessary columns saved, without any 
 
 ### Display diagram
 
-Now that we have the data we need, we can create a diagram. I chose the `geom_line` style, because we want to look at a difference over time, and that is the style that is the most suitable for that kind of diagram.
+Now that we have the data we need, we can create the diagram. I chose the `geom_line` style, because we want to look at a difference over time, and that is the style that is the most suitable for that kind of diagram.
 
 ```{r}
 ggplot(data = final2) +
@@ -189,9 +188,11 @@ We also see that high education does not necessarily mean high annual disposable
 
 This part will carry out the multivariate regression. Here, the dataframe `final3` of the scatter plots in the last part are used to perform the regression.
 
-First, we will create a linear regression model of the dataframe by using the `lm()` command. After that, we generate the summary of that model:
+First, we load the needed library. Then, we will create a linear regression model of the dataframe by using the `lm()` command. After that, we generate the summary of that model:
 
 ```{r}
+library(car)
+
 regmodel <- lm(eu_edatt_ed58_y2564t_nuts1 ~ year + eu_b6n_eur_hab_nuts1, data = final3)
 
 summary(regmodel)
@@ -201,13 +202,46 @@ As we can see, the residuals are symmetrically distributed while the median is c
 The independent variable, in this case the year and the annual disposable income, were found to be statistically significant in the model, with the p-values that can be observed in the summary. The coefficient for "year" is 0.3584, which means that for each year the dependent variable increases by 0.3584 units. As a contrast, the coefficient for the annual disposable income is -2.761e-04, which means that for each unit increase in the annual disposable income, the dependent variable decreases by -2.761e-04 units.
 The R-squared value of that model is 0.1007, which indicates that the independent variables, so year and the annual disposable income, explain about 10% of the variance in the dependent variable. The adjusted R-squared is 0.09443, which is a slight adjustment to R-squared that penalizes models with many predictors relative to the number of observations.
 The overall fit of the model is significant, as indicated by a low p-value of 2.681e-07 for the F-statistic.
+To sum this summary up, the model is a good fit for the data. However, the R-squared value is relatively low, indicating that the independent variables only explain a small proportion of the variance in the dependent variable.
 
+To make sure that the model does not have strong correlation, we use the following code:
 ```{r}
 cor_matrix <- cor(final3[, c("year", "eu_edatt_ed58_y2564t_nuts1")])
 
 print(cor_matrix)
-
-library(corrplot)
-
-corrplot(cor_matrix)
 ```
+The printed matrix shows that there is a weak positive correlation between the year and the percentage of tertiary education. This suggest that there is some association between the two variables, but it is not significant.
+
+Also, we need to check for strong collinearity. For this, we run the following code:
+
+```{r}
+vif(regmodel)
+```
+
+This outputs a weak collinearity between the independent variables. However, it is not a high value and this value can be considered acceptable.
+
+Now we can have a more in-depth sight into the summary of the model. We first look into the Residuals vs Fitted diagram of that model. To generate that diagram, we run the following code:
+
+```{r}
+plot(regmodel, which = 1)
+```
+
+As we can see, here is no obvious pattern by the red line, which indicates an almost perfect scenario. Also, the variance is constant, which can be seen by the residuals being randomly scattered around the horizontal line at zero.
+
+We also check the normality assumption of our regression model. The following code generates the "Normal Q-Q" diagram:
+
+```{r}
+plot(regmodel, which = 2)
+```
+
+We see that the graph does not form a curved pattern, which means that the data is normal distributed. However, we do notice that the diagram has a so called "heavy tail", which means that the points at the lower end deviate from the dotted middle line. This indicates that the data has a positive skewness, which is measure of the asymmetry of a probability distribution of a random variable about its mean. The positive indicates that the data has more values on the right side of the mean than on the left side. Otherwise, the diagram is not conspicuous regarding the normality of the data, which means the model can here be considered as acceptable.
+
+We can also check the Homoscedasticity of the model by creating the following diagram:
+
+```{r}
+plot(regmodel, which = 3)
+```
+
+As the diagram shows, the model is a homoscedastic model, because the residuals are again randomly scattered with no obvious pattern. This means that the homoscedasticity assumption is met, which means that variance of the residuals are constant, which also indicates that the model is acceptable.
+
+To sum all the regression up, the model is fitting for the data, even though the R-squared value in the summary is lower than acceptable.
