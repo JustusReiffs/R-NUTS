@@ -3,7 +3,7 @@
 This report was written to gather a better insight about general educational data about countries in Europe.
 
 This report is divided into two major parts: </br>
-- The first part, which contains various data tidying and visualizations by both Justus and Jan
+- The first part, which contains various data tidying and visualizations by both Justus and Jan </br>
 - The second part, which is written individually and contains the regression </br>
 
 We will now start with the first part. Here, each person wrote a little section about the process of tidying and visualisation. The creator of each section is mentioned in the title of the section. 
@@ -464,4 +464,73 @@ To sum all the regression up, the model is fitting for the data, even though the
 
 ## Regression - written by Justus Reiffs
 
--- hier Regression einfügen --
+This part is written by Justus Reiffs. In this part will be performed a multivariate regression. Therefore the Educational attainment for 
+the ages between 15 and 64 in secondary education for both genders are going to be compared to 
+the percentage of being at risk of being in poverty by the NUTS regions.
+
+### Collecting data 
+
+First the libraries are needed. Therefore the ggplot2 and tidyverse libary is loaded. This gives the
+possibility to use multiple commands and steps managing the data. 
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+```
+
+Then the Dataset for the regression is read and stored in the variable "info".
+
+```{r}
+info <- read.csv("qog_eureg_wide1_nov20.csv")
+```
+
+Then the model for linear regression is build. Therefore the variable model is used to store the
+"lm()" command. Inside that command the information is defined. Once we have the risk of poverty and 
+the educational attainment. Also the information for the year and the dataset are included.
+Then the summary function will call a summary of that model.
+
+```{r}
+model <- lm(eu_povrisk_pc_nuts0 ~ eu_edatt_ed34_y2564t_nuts0 + year, data = info)
+
+summary(model)
+```
+
+The first result we we get is the output from the summary. First we get the call for the model. 
+After the that residuals are given. The median has an value of -1.090 that is near to 0. also
+the min and max values are very close and only habe a difference in a view points.
+The coefficient values are as follows. The values here are less than 0.05 to. That indicates 
+that there is an significand relationship between predictor variable and dependent variable.
+The low F-statistic and p-value indicates that the variables having an significant relationship 
+as well.
+
+```{r}
+plot(model, which = 1)
+```
+
+First we can analyse the Randomness of the diagramm. When the values are scattered around the 
+horizontal line for zero is to suggest that the model is corectly capturing the relationship 
+of those variabels. Second the constant variance is important. It is to see that there is an constant spread of residuals.
+That is called homoscedasticity and indicates an constant variance of the residants across the values. 
+
+```{r}
+plot(model, which = 2)
+```
+
+At first to highlight the collinerity if the diagram. The points on the diagram are nearly on a straight 
+line which indicates that the data used is aproximatly normal.
+The symmetry of the points also is very important. Here we can se that the points are roughly symmetrically
+around the line. This indicates that the data is skewed.
+Outliers are visible at the top right and are clearly apart from the other points.
+
+```{r}
+plot(model, which = 3)
+```
+
+The diagram shows a wide spreaded field of the points this indicates no clear pattern. This indicates 
+that the model correctly captures the relationship in the data.
+The constant variance is visible by its wide spread that indicates homoscedasticity and a constant 
+variance across the values.
+
+
+In the end it is to assume that the regression of that data was successful. The values are not 
+perfect but still suitable for that regression to read the results from the generated diagramms. 
