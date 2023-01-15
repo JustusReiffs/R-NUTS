@@ -1,36 +1,46 @@
+# Part Justus Reiffs
 
-To start we need to import the library. The library stores the comands wich are used to 
-visualize the data.
+This Part will show the developpment of education and employment in comparison for male and female genders.
 
-```{r}
-library(tidyverse)
-```
-
-here the Dataset is imported, so it is posible to acces the information from it. 
 
 ```{r}
-info <- read.csv("qog_eureg_wide1_nov20.csv")
+str(info)
 ```
+
+```{r}
+colnames(info)
+```
+## Erly Levers in Germany, differences in gernders scince 2000
 
 This Part is used to compare the developpment of school early leavers for the time scince 
 2000 till 2019 for women and men.
-To Start the library is loadet and the datadet is opend into the system. Then before 
-visualisation the data gets filtert. To start that only the information of those rows is 
-accesed wich havethe region name GERMANY. Secont the information is selected so that there 
-is region name and the the year available. Further the limits are beeing set. Therefore 
-we filter futhere that only the walues we need are available. They are also filtert fore 
-the data from the "nuts0" part. then the seperat steps get combyned so there is only one 
-variable is needed to acces the information.
-The last part is the plot wich displayes the data. 
 
-```{r comparison of erlyLevers for male and female}
+### Set up / Gather Data 
+
+To start we need to import the library. The library stores the comands wich are used to 
+handle the data.
+
+```{r}
 library(tidyverse)
+```
 
+Here the Dataset is imported, so it is posible to acces the information from it. 
+
+```{r}
 info <- read.csv("qog_eureg_wide1_nov20.csv")
+```
 
+Then before visualisation the data gets filtert. To start that only the information of 
+those rows is accesed wich havethe region name GERMANY. Secont the information is selected 
+so that there is region name and the the year available. Further the limits are beeing set. 
+Therefore we filter futhere that only the walues we need are available. They are also 
+filtert fore the data from the "nuts0" part. then the seperat steps get combyned so there 
+is only one variable is needed to acces the information.
+
+```{r}
 germaninfo <- filter(info, region_name == "GERMANY")
 
-specef <-  select(germaninfo, region_name, year)
+specef <- select(germaninfo, region_name, year)
 
 filtered <- select(germaninfo, eu_eduleave_m_nuts0:eu_eduleave_f_nuts0)
 
@@ -39,20 +49,54 @@ filtered <- select(filtered, ends_with("nuts0"))
 merged <- bind_cols(specef, filtered)
 
 merged <- filter(merged, year >= 2000 & year < 2019)
+```
 
+### DIsplay diagramm
+
+After the data is available and tidy so that it is more practical the plot can be build. 
+So this folowing code will generate a plot thar schows the the developpment of the data.
+
+```{r comparison of erlyLevers for male and female}
 ggplot(data = merged) +
   geom_line(mapping = aes(x = year, y = eu_eduleave_m_nuts0, color = "Female")) +
   geom_line(mapping = aes(x = year, y = eu_eduleave_f_nuts0, color = "Male")) +
-  scale_color_manual(name = "Gender", values = c("Female" = "blue", "Male" = "red" ))
+  scale_color_manual(name = "Gender", values = c("Female" = "blue", "Male" = "red")) +
+  ggtitle("Comparison of erlylevers in education for Female and male") +
+  xlab("Time in years(2000-2019)") +
+  ylab("Percentage of erly levers")
 ```
 
+The Diagramm shows the developpment of erly levers from education and training in percentage
+in the time between 2000 and 2019 in comparison for male and female gender. 
+In the begining there where more male levers than female leavers which turned after a 
+couple years. So before 2005 the amount of femalef increased mote than the amount of the males 
+that quit erly. In general the amount of erlylevers is decreaseing but the amount of females is 
+much higer than the amount if males in 2019.
 
+## Employment rate for age between 15-34 in Europe
+
+In this part the Employment rate for Germany, France, NETHERLANDS and Poland is going to 
+be compared.
+
+### Set up / Gather Data 
+
+First the it is important to doad the library. In this case it is the tidyverse library.
+
+```{r}
+library(tidyverse)
+```
+
+Here the dataset is accesed and read. The information is stored in the variable "info".
+
+```{r}
+info <- read.csv("qog_eureg_wide1_nov20.csv")
+```
+
+To continue the data needs to be tidy. So in this case the data for each country gets 
+filtered and stored in an own variable. After that the information for each country gets 
+selectet and specified further. 
 
 ```{r regional educaton}
-library(tidyverse)
-
-info <- read.csv("qog_eureg_wide1_nov20.csv")
-
 ger <- filter(info, region_name == "GERMANY")
 fr <- filter(info, region_name == "FRANCE")
 nl <- filter(info, region_name == "NETHERLANDS")
@@ -82,23 +126,61 @@ ger_merge <- filter(ger_merge, year >= 2000 & year < 2019)
 fr_merge <- filter(fr_merge, year >= 2000 & year < 2019)
 nl_merge <- filter(nl_merge, year >= 2000 & year < 2019)
 pl_merge <- filter(pl_merge, year >= 2000 & year < 2019)
-
-ggplot() +
-  geom_line(data = ger_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "black")) +
-  geom_line(data = fr_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "blue")) +
-  geom_line(data = nl_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "orange")) +
-  geom_line(data = pl_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "red")) +
-  ggtitle("")
 ```
 
-```{r rmployment rate }
+### DIsplay diagramm
+
+To create the plot the ggplot function is used. Than there are vour values displayed in 
+comparison. 
+
+```{r}
+ggplot() +
+  geom_line(data = ger_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "Germany")) +
+  geom_line(data = fr_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "France")) +
+  geom_line(data = nl_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "Netherlands")) +
+  geom_line(data = pl_merge, aes(x = year, y = eu_empl_durtotal_nuts0, color = "Poland")) +
+  scale_color_manual(name = "Gender", values = c("Germany" = "black", "France" = "blue", "Netherlands" = "orange", "Poland" = "red")) +
+  ggtitle("Employment rate for 15-34 jears in Germany, France, Netherlands and Poland scince 2000") +
+  xlab("Time in years(2000-2019)") +
+  ylab("Employment rate for people between 15 and 34")
+```
+
+The generated diagram displayes the employment rate for people between the age of 15 and 34 
+in comparison for Germany, France, Netherlands and Poland over the time between 2000 and 2019.
+In the start the Employmentrate in poland is the lowest while the Employmentrate in the 
+netherland is the higest. Arount 2002 the Rate in poland increased and grows over 75. While 
+after 2007 the employment rate in France decreased. The german employment rate in the begining 
+decreased till 2005. After 2005 the rate incresed. In the end the Emploment rate in the 
+netherlands is the higest followed by germany and poland while france has the lowest.
+
+## Employment rate in germany for Male and Female
+
+In this part the developpment of the Employmentrate for Female and Male is compared. Theredore 
+the Employmentrate of 15-24 jears old and 25-34 jears old is compared in an time from 1999-2019.
+
+### Set up / Gather Data 
+
+To start the library is loaded. The libary uded is the tidyvers libary because it is one of 
+the most comen ones. 
+
+```{r}
 library(tidyverse)
+```
 
+Here the dataset is made available and read. After it has been imported to the info variable.
+
+```{r}
 info <- read.csv("qog_eureg_wide1_nov20.csv")
+```
 
+Here the data is filtered and tidyed so that only the relevant parts are interfereeng with the 
+plot. The Data gets limetet for the german values and further selected fore the specific 
+factors and the years that are under inverstigation.
+
+```{r}
 gerinfo <- filter(info, region_name == "GERMANY")
 
-spec <-  select(germaninfo, region_name, year)
+spec <- select(germaninfo, region_name, year)
 
 ger_fil <- select(gerinfo, eu_emp_1524f_nuts0:eu_emp_2534t_nuts0)
 
@@ -107,31 +189,27 @@ ger_fil <- select(ger_fil, ends_with("nuts0"))
 ger_merge <- bind_cols(spec, ger_fil)
 
 ger_merge <- filter(ger_merge, year >= 1999 & year < 2019)
+```
 
+### DIsplay diagramm
+
+In the following the plot is createt using the ggplot.
+
+```{r rmployment rate }
 ggplot(data = ger_merge) +
   geom_line(mapping = aes(x = year, y = eu_emp_1524f_nuts0, color = "Female 15-24 years old")) +
   geom_line(mapping = aes(x = year, y = eu_emp_1524m_nuts0, color = "Male 15-24 years old")) +
   geom_line(mapping = aes(x = year, y = eu_emp_2534f_nuts0, color = "Female 25-34 years old")) +
   geom_line(mapping = aes(x = year, y = eu_emp_2534m_nuts0, color = "Male 25-34 years old")) +
-  scale_color_manual(name = "Age Groups", values = c("Female 15-24 years old" = "#0000ff", "Male 15-24 years old" = "#7979ff","Female 25-34 years old" = "#e600ff", "Male 25-34 years old" = "#ff6ef8"))
+  scale_color_manual(name = "Age Groups", values = c("Female 15-24 years old" = "#0000ff", "Male 15-24 years old" = "#7979ff", "Female 25-34 years old" = "#e600ff", "Male 25-34 years old" = "#ff6ef8")) +
+  ggtitle("Employment rate for 15 to 24 jears old and 25 to 34 in Germany between 1999 and 2019") +
+  xlab("Time in years(1999-2019)") +
+  ylab("Employment rate")
 ```
 
-```{r}
-info <- read.csv("qog_eureg_wide1_nov20.csv")
+The diagram shows the Employment rate for Male and Female in comparison of there gender and 
+their age. The first age is 15 to 24 jears old and the second is for 25 to 34 jears old. 
+The rate for the 25-34 jears old in general is huger than the one for 15 to 34 jears old. 
+Also for both groups the rate for the female group is much lower than the rate for the male.
 
-gerinfo <- filter(info, region_name == "GERMANY")
-
-```
-
-```{r}
-str(info)
-```
-
-```{r}
-colnames(info)
-```
-
- geom_line(mapping = aes(x = year, y = eu_emp_2064f_nuts0, color = "Female 20-60 years old")) +
-  geom_line(mapping = aes(x = year, y = eu_emp_2064m_nuts0, color = "Male 20-60 years old")) +
-
-   "Female 20-60 years old" = "#ff0000", "Male 20-60 years old" = "#ff7575", 
+## Regression
