@@ -213,3 +213,22 @@ The rate for the 25-34 jears old in general is huger than the one for 15 to 34 j
 Also for both groups the rate for the female group is much lower than the rate for the male.
 
 ## Regression
+
+In this part will be performed a multyvariate regression. 
+
+### collecting data 
+
+first the libraries are needet 
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+
+info <- read.csv("qog_eureg_wide1_nov20.csv")
+
+model <- lm(eu_eduleave_t_nuts0 ~ eu_empl_durtotal_nuts0 + year, data = info)
+summary(model)
+
+ggplot(data = info, aes(eu_empl_durtotal_nuts0, eu_eduleave_t_nuts0)) +
+  geom_point()
+```
