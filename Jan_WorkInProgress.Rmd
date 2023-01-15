@@ -1,10 +1,10 @@
 # Part Jan Pinto Strohhäusl
 
-The following was written by Jan Pinto Strohhäusl. This chapter will discuss different educational values of countries.
+The following text was, if not stated otherwise, written by Jan Pinto Strohhäusl. This chapter will discuss different educational values of countries.
 
-## No educational attainment in Germany
+## Amount of early leavers in Europe
 
-This part will show and discuss the percentage of people in Germany who have not graduated from primary school or completed lower secondary education.
+This part will focus on the amount of young people aged 18 - 24, which left any education and training and are not participating in any education and training.
 
 ### Gather and tidy data
 
@@ -15,45 +15,104 @@ We first import the `tidyverse`-library, because this library is the most common
 library(tidyverse)
 ```
 
+Then, we import the dataset from the CSV-File in our `alldata1`-variable:
+
+```{r}
+alldata1 <- read_csv("qog_eureg_wide1_nov20.csv")
+```
+
+Now that we have our data, we first need set a specific year, because we do not want to see a change over time, but a data from a specific year. To accomodate missing data, I chose the year 2015, because that is a fairly new year, so that data is still relevant. Also, the reason I chose 2015 is because the years after 2015 tend to lack data, so I settled at 2015 to just to be sure that there will be data:
+
+```{r}
+limited1 <- filter(alldata1, year == 2015)
+```
+
+Then, we can filter out the columns we need. That would be the two-letter code of the country, the country name and the columns that holds the data: 
+
+```{r}
+filtered1 <- select(limited1, region_name, region_code, eu_eduleave_t_nuts0)
+```
+
+We only need data that relates to a country, not a region. However, we still have rows that are regions of a country. To filter these out, we enter the following command:
+
+```{r}
+final1 <- filtered1 %>% filter_all(all_vars(!is.na(.)))
+```
+
+Conveniantly, this also deletes all countries from the dataframe that have no data for that specific context. For the last step, we need to create a new row in our dataframe. This way, we can later in the diagram generate a legend.
+
+```{r}
+final1$region_code_name <- paste(final1$region_code, ":", final1$region_name)
+```
+
+Now that we have our final dataframe, we can then generate the diagram.
+
+### Display diagram
+
+The following code will generate a bar chart diagram. The reason why it is a bar chart is so we can clearly see the differences between countries:
+
+```{r fig.width=12, fig.height=8}
+ggplot(data = final1, aes(x = region_code, y = eu_eduleave_t_nuts0, fill = region_code_name)) +
+    geom_bar(stat = "identity") +
+    xlab("Country") +
+    ylab("Percentage in %") +
+    ggtitle("Percentage of people that left education and training, age 18-24, 2015") +
+    guides(fill = guide_legend(title = "Country code : Country name"))
+```
+
+Here, we see that most of the countries are fairly near to each other. However, Turkey is the country with the most young people who left education and training. As a contrast, Croatia has most of its young people in education and training. As a matter of fact, most balkan countries are in the lower area of the bar chart. For me, there is not a apparent reason for that. Maybe they are more engaged to get a higher degree as other countries, so they can live a better life, or they are learning earlier how to craft, so they have early a secure job.
+
+## No educational attainment in Germany
+
+This part will show and discuss the percentage of people in Germany who have not graduated from primary school or completed lower secondary education.
+
+### Gather and tidy data
+
+Like in the first part, we first start with loading the library `tidyverse`:
+
+```{r}
+library(tidyverse)
+```
+
 Then, we import our dataset, which is saved in a CSV-File:
 
 ```{r}
-alldata <- read_csv("qog_eureg_wide1_nov20.csv")
+alldata2 <- read_csv("qog_eureg_wide1_nov20.csv")
 ```
 
-Now, we have a variable called `alldata`, which holds all the data from the imported dataset. However, to generate our diagram, we need to tidy it up, because there is data, which we will not use. </br>
+Now, we have a variable called `alldata2`, which holds all the data from the imported dataset. However, to generate our diagram, we need to tidy it up, because there is data, which we will not use. </br>
 First, we filter only the data that is related to Germany, because that is the data we are interested in:
 
 ```{r}
-onlyGER <- filter(alldata, region_name == "GERMANY")
+onlyGER2 <- filter(alldata2, region_name == "GERMANY")
 ```
 
 Because here is data, that we also do not need, we then filter the columns to the columns we need:
 
 ```{r}
-filtered <- select(onlyGER, year, eu_edatt_ed02_y2564f_nuts0:eu_edatt_ed02_y2564t_nuts0)
+filtered2 <- select(onlyGER2, year, eu_edatt_ed02_y2564f_nuts0:eu_edatt_ed02_y2564t_nuts0)
 ```
 
 Now we still have columns, that are empty. The reason why there are columns that are empty is because how the dataset is set up. There are two seperate columns for each data: a column for the whole country (marked as "NUTS0"), and a column for a specific region in that country (marked as "NUTS1"). However, the dataset is set up in such a way, that each row takes both columns, creating null values. To accomodate this, we need to filter out the columns that are intended to use for regions. This is because we want to look at Germany as a whole, and are not in need of region specific data:
 
 ```{r}
-filtered <- filtered %>% select(year, ends_with("nuts0"))
+filtered2 <- filtered2 %>% select(year, ends_with("nuts0"))
 ```
 
 The final step now is to set the right time frame. The reason we do this is because there is only data available in a specific time frame, which is between 2000 and 2018. In order to set the right time frame, we need to filter again:
 
 ```{r}
-final <- filter(filtered, year >= 2000 & year < 2019)
+final2 <- filter(filtered2, year >= 2000 & year < 2019)
 ```
 
-The `final`-variable now has year and the necessary columns saved, without any null values. Now we can generate a diagram for that dataframe.
+The `final2`-variable now has year and the necessary columns saved, without any null values. Now we can generate a diagram for that dataframe.
 
 ### Display diagram
 
 Now that we have the data we need, we can create a diagram. I chose the `geom_line` style, because we want to look at a difference over time, and that is the style that is the most suitable for that kind of diagram.
 
 ```{r}
-ggplot(data = final) +
+ggplot(data = final2) +
     geom_line(mapping = aes(x = year, y = eu_edatt_ed02_y2564f_nuts0, color = "Female")) +
     geom_line(mapping = aes(x = year, y = eu_edatt_ed02_y2564m_nuts0, color = "Male")) +
     geom_line(mapping = aes(x = year, y = eu_edatt_ed02_y2564t_nuts0, color = "Total")) +
@@ -65,68 +124,63 @@ ggplot(data = final) +
 
 As we can see, the amount of people how do not have a lower graduation has decreased over that time frame. However, when we look closely, we can see that there is a strong increase in every group between 2005 and 2007. This can correlate to the finance crisis, which was at that time, resulting in german children not being send to school. Interestingly, the percentage of female people is way higher than the percentage of male people. However, the amount of female people not having a lower degree has dropped significantly over the time. We can see a slight increase in the total percentage after 2015. This corrolates to the refugee crisis, which started in 2015 and was at its peak in early 2016. We also see that the male proportion was heavily increased by that, while the female proportion was only slightly affected. However, we do see that the total amount already again starts to decrease.
 
-## Amount of early leavers in Europe
+## Higher education to income comparison in Germany
 
-This part will focus on the amount of young people aged 18 - 24, which left any education and training and are not participating in any education and training.
+This part will show and discuss how a higher education and the income per inhabitant correlate together.
 
 ### Gather and tidy data
 
-Like in the first part, we first start with loading the library `tidyverse`:
+We first start with loading the `tidyverse`-library: 
 
 ```{r}
 library(tidyverse)
 ```
 
-Then, we again import the dataset from the CSV-File in our `alldata`-variable:
+Then, we import all the data from the CSV-File into out `alldata3`-variable:
 
 ```{r}
-alldata <- read_csv("qog_eureg_wide1_nov20.csv")
+alldata3 <- read_csv("qog_eureg_wide1_nov20.csv")
 ```
 
-Now that we have our data, we first need set a specific year, because we do not want to see a change over time, but a data from a specific year. To accomodate missing data, I chose the year 2015, because that is a fairly new year, so that data is still relevant. Also, the reason I chose 2015 is because the years after 2015 tend to lack data, so I settled at 2015 to just to be sure that there will be data:
+When we loaded all the data, we then can start filtering the rows we need. Here, because we want to look at the regional differences in Germany, we need every row that holds regional data about Germany. So we first filter all rows that belongs to Germany, regardless of whether it is a regional row or a row about the whole country. Then, we delete all rows that holds data about the whole country, because these are not relevant to us:
 
 ```{r}
-limited <- filter(alldata, year == 2015)
+onlyGER3 <- alldata3[grep("DE", alldata3$region_code), ]
+ 
+filtered3 <- onlyGER3[!grepl("GERMANY", onlyGER3$region_name), ]
 ```
 
-Then, we can filter out the columns we need. That would be the two-letter code of the country, the country name and the columns that holds the data: 
+Now we can filter all the rows we need. In our comparison, we need the region name, the year, the percentage of people between the ages of 25 - 64 that have completed a tertiary education and the average annual disposable income of each inhabitant:
 
 ```{r}
-filtered <- select(limited, region_name, region_code, eu_eduleave_t_nuts0)
+filtered3 <- select(filtered3, region_name, year, eu_edatt_ed58_y2564t_nuts1, eu_b6n_eur_hab_nuts1)
 ```
 
-Like in the part before, we only need data that relates to a country, not a region. However, we still have rows that are regions of a country. To filter these out, we enter the following command:
+Now that we still have rows that do not hold data, we can filter them out. That results into a dataframe, that we can use later to display a diagram:
 
 ```{r}
-final <- filtered %>% filter_all(all_vars(!is.na(.)))
+final3 <- filtered3 %>% filter_all(all_vars(!is.na(.)))
 ```
 
-Conveniantly, this also deletes all countries from the dataframe that have no data for that specific context.
-For the last step, we need to create a new row in our dataframe. This way, we can later in the diagram generate a legend.
+The `final3`-variable results into a dataframe which holds data to the topic from the years 2000 to 2017. To be sure that the values are indeed between 2000 to 2017, we can still filter them:
 
 ```{r}
-final$region_code_name <- paste(final$region_code, ":", final$region_name)
+final3 <- filter(final3, year >= 200 & year < 2018)
 ```
-
-Now that we have our final dataframe, we can then generate the diagram.
 
 ### Display diagram
 
-The following code will generate a bar chart diagram. The reason why it is a bar chart is so we can clearly see the differences between countries:
+The following code displays scatterplots. Each region in Germany has their own scatterplot, and there can be seen a change in every scatterplot over time:
 
-```{r fig.width=12, fig.height=8}
-ggplot(data = final, aes(x = region_code, y = eu_eduleave_t_nuts0, fill = region_code_name)) +
-    geom_bar(stat = "identity") +
-    xlab("Country") +
-    ylab("Percentage in %") +
-    ggtitle("Percentage of people that left education and training, age 18-24, 2015") +
-    guides(fill = guide_legend(title = "Country code : Country name"))
+```{r fig.width=10, fig.height=10}
+ggplot(data = final3) +
+    geom_point(mapping = aes(x = eu_edatt_ed58_y2564t_nuts1, y = eu_b6n_eur_hab_nuts1, size = year)) +
+    facet_wrap(~region_name) +
+    xlab("Percentage in %") +
+    ylab("Euro in €") +
+    ggtitle("Income and tertiary Education in Germany: Regional Comparison, 2000-2017")
 ```
 
-Here, we see that most of the countries are fairly near to each other. However, Turkey is the country with the most young people who left education and training. As a contrast, Croatia has most of its young people in education and training. As a matter of fact, most balkan countries are in the lower area of the bar chart. For me, there is not a apparent reason for that. Maybe they are more engaged to get a higher degree as other countries, so they can live a better life, or they are learning earlier how to craft, so they have early a secure job.
-
-```{r tidy data 3}
-library(tidyverse)
-
-alldata <- read_csv("qog_eureg_wide1_nov20.csv")
-```
+As the diagrams show, every annual disposable income has increased during that time period. Also, almost every region had an increase in people with higher education. However, Thuringia, Saxony and Saxony-Anhalt seem to have decreased their percentage of people with higher education over the years. A reason is that the wages are in former DDR regions lower than in the old german regions, and it could be that people with higher education moved into these regions because of higher wages. As we can see, Thuringia, Saxony and Saxony-Anhalt have all the lowest annual disposable income for people with higher education, directly followed by Mecklenburg-Western Pomerania, which is also a former DDR region.
+We can also see, that people with higher education have the highest annual disposable in Bavaria. High education in Bavaria is in Germany considered as the hardest to achieve. Therefore, the wages are accordingly higher than in other regions.
+We also see that high education does not necessarily mean high annual disposable income. Berlin, for example, has many people with high education, but the annual disposable income is there lower than it could expected.
