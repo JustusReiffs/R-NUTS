@@ -220,15 +220,21 @@ In this part will be performed a multyvariate regression.
 
 first the libraries are needet 
 
-```{r}
+```{r Unemployment rate - risk to poverty}
 library(ggplot2)
 library(tidyverse)
 
 info <- read.csv("qog_eureg_wide1_nov20.csv")
 
-model <- lm(eu_eduleave_t_nuts0 ~ eu_empl_durtotal_nuts0 + year, data = info)
+#info <- filter(info, region_name == "GERMANY")
+
+model <- lm(eu_povrisk_pc_nuts0 ~ eu_unemp_ge15t_nuts0 + year, data = info)
 summary(model)
 
-ggplot(data = info, aes(eu_empl_durtotal_nuts0, eu_eduleave_t_nuts0)) +
-  geom_point()
+summary(model)
+attributes(model)
+model$coefficients
+attach(info)
+
+plot(eu_povrisk_pc_nuts0,eu_unemp_ge15t_nuts0)
 ```
